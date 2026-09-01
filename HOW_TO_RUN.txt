@@ -1,0 +1,56 @@
+# ==============================================================================
+# SmartShift: Worksite Roster & Team Scheduling Platform
+# Quick Start & Evaluation Guide
+# ==============================================================================
+
+Hello Evaluator! 
+
+Welcome to SmartShift — a smart, stress-free employee scheduling web portal
+inspired by 7shifts.
+
+------------------------------------------------------------------------------
+ HOW TO RUN LOCALLY (Zero Installation Required!)
+------------------------------------------------------------------------------
+
+Step 1: Open the project folder:
+        D:\FSD_Project\smart-roster-manager\
+
+Step 2: Double-click 'index.html' to open the Master Landing Page in any
+        modern browser (Google Chrome, Microsoft Edge, Brave, Firefox, Safari).
+
+Step 3: (Optional Developer Mode)
+        If using VS Code, right-click 'index.html' and select 'Open with Live Server'.
+
+------------------------------------------------------------------------------
+ QUICK FEATURE WALKTHROUGH & TEST CASES
+------------------------------------------------------------------------------
+
+1. Master Landing Page ('index.html'):
+   - Click "⚡ Live Rule Simulator" or "⚡ Test Live Validation Engine Now" on the hero banner.
+   - Test Worker 1 (Alex Rivera) -> All 3 rules pass cleanly (Passed ✅).
+   - Test Worker 2 (Sam Wilson) -> Flags Availability Conflict (Blocked 🚫).
+   - Test Worker 3 (Jordan Lee) -> Flags Skill Certification Mismatch (Blocked 🚫).
+   - Test Worker 4 (Taylor Swift) -> Flags Weekly Overtime Cap Risk (Blocked 🚫).
+
+2. Employee Availability Portal ('employee.html'):
+   - Click "Staff Portal" in the top navigation.
+   - Tap any slot in the Monday-to-Sunday timetable grid to smoothly cycle:
+     Available  ->  Preferred ⭐  ->  Unavailable ✕  ->  Available
+   - Click "💾 Save & Submit Availability" to trigger the live confirmation toast.
+   - View confirmed upcoming shifts with weekly hours and earnings in Rs.
+
+3. Store Manager Roster Studio ('manager.html'):
+   - Click "Manager Roster" in the top navigation.
+   - Tap role filter pills (All Roles, Baristas, Cashiers, Kitchen/Prep) to filter live.
+   - Click "Assign Staff" on any open slot to open the real-time pre-check modal.
+   - Confirm assignment to instantly update the schedule and labor budget counters.
+
+------------------------------------------------------------------------------
+ MODULE ALLOCATION (4 MEMBERS)
+------------------------------------------------------------------------------
+- Team Lead (Frontend Architect): index.html, css/styles.css, js/app.js, README.md
+- Member 2 (Employee Portal): employee.html, css/employee.css, js/employee.js
+- Member 3 (Manager Matrix): manager.html, css/manager.css, js/manager.js
+- Member 4 (Middleware & Data): js/mockData.js, js/validation.js, css/validation.css
+
+Thank you! 
