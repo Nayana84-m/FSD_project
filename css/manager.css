@@ -1,0 +1,162 @@
+/* ==========================================================================
+   MANAGER ROSTER STYLES (7shifts Inspired)
+   Author: Member 3 (Manager Roster Specialist)
+   ========================================================================== */
+
+.manager-toolbar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 0;
+  margin-bottom: 2rem;
+}
+
+.toolbar-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-secondary);
+}
+
+.filter-pill:hover, .filter-pill.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.manager-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.manager-stat-card {
+  background: white;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.manager-stat-card .stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.manager-stat-card .stat-num {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+/* Shift Matrix Grid */
+.roster-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.5rem;
+}
+
+.day-column {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.day-column-header {
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--bg-alt);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.day-column-header h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.shifts-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Shift Box */
+.shift-matrix-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--bg-page);
+  transition: var(--transition);
+}
+
+.shift-matrix-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.shift-matrix-card.assigned {
+  border-left: 4px solid var(--success);
+  background: white;
+}
+
+.shift-matrix-card.unassigned {
+  border-left: 4px solid var(--warning);
+  background: #fffdfa;
+}
+
+.shift-role-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.assigned-staff-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: var(--success-bg);
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-sm);
+  margin-top: 0.75rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.assign-action-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+}

@@ -1,0 +1,74 @@
+/* ==========================================================================
+   SMART MIDDLEWARE VALIDATION STYLES (7shifts Inspired)
+   Author: Member 4 (Middleware & Data Architect)
+   ========================================================================== */
+
+.validation-feedback-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.feedback-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.rule-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.85rem;
+}
+
+.rule-check-item:last-child {
+  border-bottom: none;
+}
+
+.rule-status-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.rule-status-pass {
+  color: var(--success);
+}
+
+.rule-status-fail {
+  color: var(--danger);
+}
+
+.rule-status-warn {
+  color: var(--warning);
+}
+
+.validation-summary-alert {
+  margin-top: 1rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.validation-summary-alert.success {
+  background-color: var(--success-bg);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.validation-summary-alert.danger {
+  background-color: var(--danger-bg);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
