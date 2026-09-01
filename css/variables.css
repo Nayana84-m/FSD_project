@@ -1,0 +1,156 @@
+/* ==========================================================================
+   SMARTSHIFT — CSS VARIABLES & DESIGN TOKENS
+   Theme: Deep Slate Dark — Teal Primary, Amber Accent
+   ========================================================================== */
+
+:root {
+  /* ── Backgrounds ────────────────────────────────────────────────────────── */
+  --bg:        #f5f9ff;
+  --surface:   #ffffff;
+  --surface-2: #eef5ff;
+  --border:    rgba(69, 112, 255, 0.14);
+
+  /* ── Brand colors — brighter and colorful like 7shifts ─────────────────── */
+  --primary:       #4570FF;
+  --primary-light: #6d8dff;
+  --primary-dim:   rgba(69, 112, 255, 0.12);
+  --primary-glow:  0 12px 32px rgba(69, 112, 255, 0.22);
+
+  --accent:      #FF6808;
+  --accent-soft: #ff9d5c;
+  --accent-dim:  rgba(255, 104, 8, 0.11);
+
+  --mint:        #00FEB2;
+  --mint-soft:   #7ff7d8;
+  --purple:      #C293F1;
+  --yellow:      #FFCB45;
+
+  /* ── Text ───────────────────────────────────────────────────────────────── */
+  --text:       #1b2333;
+  --text-dim:   #5d6b82;
+  --text-muted: #8b96a9;
+
+  /* ── Status ─────────────────────────────────────────────────────────────── */
+  --green:     #1ecf8a;
+  --green-dim: rgba(30, 207, 138, 0.12);
+  --red:       #ff6a6a;
+  --red-dim:   rgba(255, 106, 106, 0.1);
+
+  /* ── Role Tags ──────────────────────────────────────────────────────────── */
+  --tag-primary-bg:  rgba(69, 112, 255, 0.12);
+  --tag-primary-txt: #2f5cff;
+  --tag-accent-bg:   rgba(255, 104, 8, 0.12);
+  --tag-accent-txt:  #e95b00;
+
+  --brand-gradient: linear-gradient(135deg, var(--primary) 0%, var(--mint) 52%, var(--accent) 100%);
+
+  /* ── Shape ──────────────────────────────────────────────────────────────── */
+  --r-sm:   6px;
+  --r-md:   10px;
+  --r-lg:   16px;
+  --r-pill: 999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────────────── */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg:   0 20px 48px rgba(0, 0, 0, 0.5);
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --font-head: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* ── Motion ─────────────────────────────────────────────────────────────── */
+  --ease: 0.2s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESET & BASE
+   ───────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+html { 
+  scroll-behavior: smooth; 
+  font-size: 16px; 
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at top left, rgba(69, 112, 255, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(255, 104, 8, 0.12), transparent 24%),
+    radial-gradient(circle at bottom center, rgba(0, 254, 178, 0.12), transparent 30%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.7;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { 
+  text-decoration: none; 
+  color: inherit; 
+}
+
+ul { 
+  list-style: none; 
+}
+
+button { 
+  font: inherit; 
+  cursor: pointer; 
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LAYOUT UTILITIES
+   ───────────────────────────────────────────────────────────────────────────── */
+.container {
+  width: min(1120px, 92%);
+  margin-inline: auto;
+}
+
+.section { 
+  padding: 5rem 0; 
+}
+
+.section-alt { 
+  background: var(--surface); 
+}
+
+/* Shared section header */
+.section-header {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 3rem;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--teal-light);
+  background: var(--teal-dim);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  padding: 0.28rem 0.9rem;
+  border-radius: var(--r-pill);
+  margin-bottom: 0.9rem;
+}
+
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.section-sub {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
