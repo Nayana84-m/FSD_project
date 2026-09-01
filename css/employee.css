@@ -1,0 +1,209 @@
+/* ==========================================================================
+   EMPLOYEE PORTAL STYLES (7shifts Inspired)
+   Author: Member 2 (Employee Experience Engineer)
+   ========================================================================== */
+
+.portal-header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.portal-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.staff-info-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.staff-avatar-large {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  border: 2px solid var(--primary-light);
+}
+
+.hours-metric-card {
+  background: var(--bg-page);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  text-align: right;
+}
+
+.hours-metric-card .hours-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary-hover);
+}
+
+/* Availability Grid */
+.availability-container {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2.5rem;
+}
+
+.grid-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.legend-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-available { background-color: var(--success); }
+.dot-preferred { background-color: var(--accent-blue); }
+.dot-unavailable { background-color: var(--danger); }
+
+.timetable-grid {
+  display: grid;
+  grid-template-columns: 130px repeat(7, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.time-col-header, .day-col-header {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 0.65rem 0.4rem;
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.time-slot-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.slot-cell {
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.78rem;
+  font-weight: 700;
+  user-select: none;
+  padding: 0.25rem;
+  text-align: center;
+}
+
+.slot-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Status States for Slots */
+.slot-cell.available {
+  background-color: var(--success-bg);
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.slot-cell.preferred {
+  background-color: var(--accent-blue-bg);
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+.slot-cell.unavailable {
+  background-color: var(--danger-bg);
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+/* Confirmed Shifts Timeline */
+.shifts-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.shift-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.shift-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.shift-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.shift-card h4 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.shift-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
