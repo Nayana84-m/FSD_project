@@ -1,142 +1,122 @@
-# SmartShift
-##  Smart Worksite Roster & Shift Manager
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com/?font=Segoe+UI&weight=700&size=45&pause=1000&color=A78BFA&center=true&vCenter=true&width=700&height=70&lines=SmartShift" alt="SmartShift" />
+</p>
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Phase](https://img.shields.io/badge/Phase-1%20Landing%20Page-7c3aed?style=for-the-badge)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com/?font=Segoe+UI&size=20&pause=1200&color=94A3B8&center=true&vCenter=true&width=600&lines=Smart+Worksite+Roster+%26+Shift+Manager" alt="tagline" />
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Phase-1-7c3aed?style=for-the-badge" />
+</p>
 
-##  Introduction
+<br>
 
-**SmartShift** is a modern, serverless workforce scheduling platform designed to replace manual spreadsheet-based rostering. Built on vanilla HTML5, CSS3, and JavaScript, it demonstrates responsive design, clean modular components, and polished micro-animations.
+## 📖 Introduction
 
-Inspired by industry-standard tools like **7shifts**, SmartShift empowers store managers and café teams to create conflict-free, automated work schedules with intelligent validation checks.
+**SmartShift** is a workforce scheduling platform built to replace manual, spreadsheet-based rostering. Store managers and café teams get conflict-free, automated weekly schedules — backed by a lightweight client-side validation engine that catches problems before a shift is ever confirmed.
 
----
+Built entirely using **HTML5, CSS3, and JavaScript**, Phase 1 demonstrates responsive design, clean modular components, and polished micro-animations — no frameworks, no backend, yet.
 
-##  The Problem
+<br>
 
-Manual scheduling using spreadsheets and WhatsApp messages leads to:
-- **Overtime Violations** — exceeding maximum contracted weekly hours
-- **No central visibility** — managers cannot easily see who is free
+## 🌫️ The Problem
 
----
+Most small teams still schedule shifts using manual spreadsheets and WhatsApp messages — a process that quietly breaks down as the team grows.
 
-##  Objectives
-
-1. Provide a centralized platform for employee availability collection
-2. Allow managers to create and manage weekly shift rosters
-3. Automate conflict detection through a **3-point Smart Validation Engine**
-4. Block invalid shift assignments before they are confirmed
-5. Reduce reliance on error-prone manual scheduling methods
-
----
-
-##  Key Features
-
-| Feature | Description |
+| Manual method | What goes wrong |
 |---|---|
-| Employee Availability | Staff submit preferred and unavailable weekly time slots |
-| Smart Validation | Automated skill, availability, and overtime checks |
-| Shift Management | Managers create and assign shifts with role requirements |
-| Weekly Hours | Employees track upcoming shifts and total hours |
+| 📊 **Manual spreadsheets** | Hours are tracked by hand, so it's easy to miss when an employee has been assigned past their contracted weekly limit — leading to unnoticed **overtime violations**. |
+| 💬 **WhatsApp messages** | Availability and shift swaps get buried in chat threads, leaving managers with **no central visibility** into who is actually free to work. |
 
-###  Smart Validation Engine (Core Innovation)
+SmartShift replaces both of these with a single, structured system — so scheduling decisions are based on real data, not scattered messages.
 
-Three automatic pre-checks before any shift is confirmed:
+<br>
 
-1. **Skill Check** — Does the employee have the required role/certification?
-2. **Availability Check** — Is the employee free during the shift?
-3. **Overtime Check** — Will the employee exceed their weekly hour cap?
+## 🧠 Smart Validation Engine
 
-If any check fails → the assignment is **automatically blocked**.
-
-> **Phase 1 Note:** These checks are visually demonstrated on the landing page. The actual backend validation will be implemented in Phase 2.
-
----
-
-##  Phase 1 Technology Stack
-
-| Technology | Purpose |
-|---|---|
-| HTML5 | Page structure and semantic markup |
-| CSS3 | Styling, dark theme, responsive layout |
-| Vanilla JavaScript ES6+ | Frontend interactions and animations |
-
-No external frameworks, libraries, or backends used in Phase 1.
-
----
-
-## Future Technology Stack (Phase 2+)
-
-| Technology | Purpose |
-|---|---|
-| React.js | Component-based frontend UI |
-| Node.js | Server-side JavaScript runtime |
-| Express.js | REST API backend framework |
-| MongoDB | Database for users, shifts, and availability |
-| JWT Authentication | Secure multi-role login (Employee / Manager) |
-| Git / GitHub | Version control and team collaboration |
-
----
-
-##  Project Structure
-
-```
-smart-roster-manager/
-│
-├── index.html       ← Landing page (Phase 1 implementation)
-├── style.css        ← Dark-theme design system, responsive layout
-├── script.js        ← Frontend JS interactions and animations
-├── README.md        ← Project documentation
-├── HOW_TO_RUN.txt   ← Quick evaluator guide
-├── LICENSE          ← MIT License
-├── .gitignore       ← Git ignore rules
-│
-└── assets/
-    └── images/      ← For future phases
+```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#7c3aed','primaryTextColor':'#fff','primaryBorderColor':'#a78bfa','lineColor':'#a78bfa','tertiaryColor':'#1a1233'}}}%%
+flowchart LR
+    S[New Shift] --> C1{Skill Check}
+    C1 -- ✅ --> C2{Availability Check}
+    C1 -- ❌ --> X[🚫 Blocked]
+    C2 -- ✅ --> C3{Overtime Check}
+    C2 -- ❌ --> X
+    C3 -- ✅ --> OK[✅ Confirmed]
+    C3 -- ❌ --> X
 ```
 
----
+> **Phase 1:** these checks are visually demonstrated on the landing page. Live backend validation ships in Phase 2.
 
-##  Team Members
+<br>
 
-| Member | Role | Contribution |
-|---|---|---|
-| [Member 1 Name] | Frontend Lead | HTML structure, semantic sections |
-| [Member 2 Name] | UI & Styling | CSS dark theme, layout, responsiveness |
-| [Member 3 Name] | Frontend Behaviour | JavaScript interactions and animations |
-| [Member 4 Name] | Refinement & Docs | Landing page polish, README, testing |
+## ✨ Key Features
 
-> Replace placeholders with actual team member names before submission.
+- 🗂️ **Employee Availability** — staff submit preferred/unavailable weekly slots
+- ✅ **Smart Validation** — automated skill, availability, and overtime checks
+- 📋 **Shift Management** — managers assign shifts against role requirements
+- ⏱️ **Weekly Hours Tracker** — employees track upcoming shifts and totals
 
----
+<br>
 
-##  How to Run the Landing Page
+## 🛠️ Tech Stack
 
-**No installation or server required.**
+```mermaid
+flowchart TB
+    subgraph P1["Phase 1 — shipped"]
+        H[HTML5] --- Csx[CSS3] --- J[Vanilla JS ES6+]
+    end
+    subgraph P2["Phase 2 — planned"]
+        R[React.js] --- N[Node.js] --- E[Express.js] --- M[(MongoDB)] --- JWT[JWT Auth]
+    end
+    P1 --> P2
+```
 
-1. Clone or download the repository:
-   ```bash
-   git clone https://github.com/your-username/smart-roster-manager.git
-   ```
-2. Open the project folder.
-3. Double-click **`index.html`** — it opens directly in any browser.
+No external frameworks, libraries, or backends are used in Phase 1.
 
----
+<br>
 
-##  Future Scope
+## ▶️ Getting Started
 
-- **React.js** frontend with Employee and Manager dashboards
-- **Node.js + Express.js** REST API backend
-- **MongoDB** for persistent storage of users, shifts, and availability
-- **JWT Authentication** for secure multi-role login
-- **Live backend validation** for all 3 smart checks
-- **GitHub collaboration** across all team members in Phase 2
+```bash
+git clone https://github.com/Nayana84-m/FSD_project.git
+```
 
----
+Open `index.html` — it launches instantly in any browser.
 
-*Phase 1 — CIE-1 | BSc Computer Science | Full Stack Development Course*
+<br>
+
+## 📁 Project Architecture
+
+```
+FSD_project/
+├── assets/
+├── css/
+├── js/
+├── .gitignore
+├── HOW_TO_RUN.txt
+├── LICENSE
+├── README.md
+└── index.html
+```
+
+<br>
+
+## 🔮 Future Scope
+
+- React.js frontend with Employee and Manager dashboards
+- Node.js + Express.js REST API backend
+- MongoDB for persistent storage of users, shifts, and availability
+- JWT Authentication for secure multi-role login
+- Live backend validation for all 3 smart checks
+
+<br>
+
+<p align="center">
+  <sub>Phase 1 · CIE-1 · BSc Computer Science · Full Stack Development Course</sub>
+</p>
