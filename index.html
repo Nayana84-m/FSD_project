@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartShift | Smart Worksite Roster & Shift Manager</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Modular Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/employee.css" />
+  <link rel="stylesheet" href="css/manager.css" />
+  <link rel="stylesheet" href="css/validation.css" />
+
+  <style>
+    /* SPA Inline Specific Enhancements */
+    .view-switcher-bar {
+      background: var(--surface-2, #f8fafc);
+      border-bottom: 1px solid var(--border, #e2e8f0);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      align-items: center;
+    }
+    .view-btn-pill {
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+    }
+    .view-btn-pill:hover, .view-btn-pill.active {
+      background: var(--primary, #4570FF);
+      color: white;
+      border-color: var(--primary, #4570FF);
+    }
+    .login-wrapper {
+      min-height: calc(100vh - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================
+       GLOBAL NAVIGATION BAR (SPA Header)
+       ====================================================== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-inner">
+
+      <a href="#" data-target-view="landing" class="brand spa-nav-link">
+        <span class="brand-icon">⚡</span>
+        <span>SmartShift</span>
+      </a>
+
+      <!-- Desktop Links -->
+      <nav class="nav-links" id="navLinks">
+        <a href="#" data-target-view="landing" class="nav-link spa-nav-link active">Home</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#" data-target-view="employee" class="nav-link spa-nav-link">Staff Portal</a>
+        <a href="#" data-target-view="manager" class="nav-link spa-nav-link">Manager Matrix</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLogin">Login</button>
+        <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStarted">Staff Portal</button>
+        <button class="btn btn-outline spa-nav-link" data-target-view="manager">Manager Admin</button>
+      </div>
+
+      <!-- Hamburger (mobile) -->
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
+      <a href="#" data-target-view="employee" class="mobile-link spa-nav-link">Staff Portal</a>
+      <a href="#" data-target-view="manager" class="mobile-link spa-nav-link">Manager Matrix</a>
+      <div class="mobile-actions">
+        <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
+        <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStartedM">Staff Portal</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Quick SPA View Switcher Toolbar -->
+  <div class="view-switcher-bar">
+    <span style="font-weight: 700; color: #475569;">Quick View Switcher:</span>
+    <button class="view-btn-pill spa-nav-link active" data-target-view="landing">🏡 Landing Page</button>
+    <button class="view-btn-pill spa-nav-link" data-target-view="login">🔑 Login</button>
+    <button class="view-btn-pill spa-nav-link" data-target-view="employee">👨‍🍳 Staff Portal</button>
+    <button class="view-btn-pill spa-nav-link" data-target-view="manager">🛡️ Manager Shift Matrix</button>
+  </div>
+
+
+  <!-- ======================================================
+       VIEW 1: LANDING PAGE VIEW (#view-landing)
+       ====================================================== -->
+  <div id="view-landing" class="app-view active">
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-content reveal">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Workforce Scheduling Platform
+          </div>
+          <h1 class="hero-heading">
+            Smart Scheduling.<br>
+            <span class="gradient-text">Conflict-Free Shifts.</span>
+          </h1>
+          <p class="hero-sub">
+            SmartShift helps managers create better work schedules by considering employee availability, required skills, and weekly working-hour limits.
+          </p>
+          <div class="hero-btns">
+            <button class="btn btn-primary btn-lg spa-nav-link" data-target-view="employee">Open Staff Portal</button>
+            <button class="btn btn-outline btn-lg spa-nav-link" data-target-view="manager">Open Manager Matrix</button>
+          </div>
+        </div>
+
+        <div class="hero-mockup reveal">
+          <div class="mockup-card">
+            <div class="mockup-bar">
+              <div class="bar-dots"><span></span><span></span><span></span></div>
+              <span class="bar-label">Weekly Roster — Preview</span>
+            </div>
+            <div class="mockup-body">
+              <div class="shift-row">
+                <span class="shift-day">MON</span>
+                <div class="shift-info">
+                  <div class="shift-time">09:00 AM – 02:00 PM</div>
+                  <span class="tag tag-barista">Barista</span>
+                </div>
+                <span class="shift-tick">✓</span>
+              </div>
+              <div class="shift-row">
+                <span class="shift-day">TUE</span>
+                <div class="shift-info">
+                  <div class="shift-time">04:00 PM – 09:00 PM</div>
+                  <span class="tag tag-cashier">Cashier</span>
+                </div>
+                <span class="shift-tick">✓</span>
+              </div>
+              <div class="shift-row">
+                <span class="shift-day">FRI</span>
+                <div class="shift-info">
+                  <div class="shift-time">04:00 PM – 09:00 PM</div>
+                  <span class="tag tag-barista">Barista</span>
+                </div>
+                <span class="shift-tick">✓</span>
+              </div>
+            </div>
+            <div class="mockup-foot">
+              <span class="live-dot"></span> Auto-Validation Active
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM + SOLUTION -->
+    <section class="section problem-section" id="about">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">The Challenge</span>
+          <h2 class="section-title">Scheduling shouldn't be a spreadsheet headache.</h2>
+          <p class="section-sub">Manual methods using spreadsheets and WhatsApp messages lead to errors, conflicts, and compliance risks.</p>
+        </div>
+        <div class="problem-grid">
+          <div class="problem-card reveal">
+            <div class="prob-icon">⚠️</div>
+            <h3>Availability Conflicts</h3>
+            <p>Employees scheduled during exams, classes, or pre-marked leave — causing last-minute chaos.</p>
+          </div>
+          <div class="problem-card reveal">
+            <div class="prob-icon">❌</div>
+            <h3>Skill Mismatches</h3>
+            <p>Uncertified staff placed in roles requiring safety training or special certification.</p>
+          </div>
+          <div class="problem-card reveal">
+            <div class="prob-icon">⏰</div>
+            <h3>Overtime Risk</h3>
+            <p>Employees pushed beyond their maximum weekly work hours without anyone noticing.</p>
+          </div>
+        </div>
+        <div class="solution-banner reveal">
+          <p class="solution-eyebrow">The SmartShift Solution</p>
+          <h3>One centralized platform for smarter workforce scheduling.</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section features-section" id="features">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">Core Platform</span>
+          <h2 class="section-title">Everything you need for smarter scheduling</h2>
+          <p class="section-sub">Built for small cafes, restaurants, and retail stores relying on part-time staff.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feat-card reveal">
+            <div class="feat-icon">📅</div>
+            <h3>Employee Availability</h3>
+            <p>Employees can communicate their preferred and unavailable working times.</p>
+          </div>
+          <div class="feat-card reveal">
+            <div class="feat-icon">🛡️</div>
+            <h3>Smart Validation</h3>
+            <p>Shift assignments checked against skills, availability and weekly hour limits.</p>
+          </div>
+          <div class="feat-card reveal">
+            <div class="feat-icon">👥</div>
+            <h3>Easy Shift Management</h3>
+            <p>Managers can create weekly shifts and assign suitable employees effortlessly.</p>
+          </div>
+          <div class="feat-card reveal">
+            <div class="feat-icon">⏱️</div>
+            <h3>Weekly Hours</h3>
+            <p>Employees track upcoming shifts and total weekly working hours in one place.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section timeline-section" id="how-it-works">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">Simple Workflow</span>
+          <h2 class="section-title">How SmartShift Works</h2>
+          <p class="section-sub">Four steps from availability collection to a confirmed, conflict-free roster.</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-step reveal">
+            <div class="tl-num">01</div>
+            <h3>Set Availability</h3>
+            <p>Employees provide their weekly availability.</p>
+          </div>
+          <div class="tl-connector"></div>
+          <div class="tl-step reveal">
+            <div class="tl-num">02</div>
+            <h3>Create Shifts</h3>
+            <p>Managers create shifts and specify required roles.</p>
+          </div>
+          <div class="tl-connector"></div>
+          <div class="tl-step reveal">
+            <div class="tl-num">03</div>
+            <h3>Smart Validation</h3>
+            <p>The system checks skills, availability and weekly hours.</p>
+          </div>
+          <div class="tl-connector"></div>
+          <div class="tl-step reveal">
+            <div class="tl-num">04</div>
+            <h3>Confirm Assignment</h3>
+            <p>Valid assignments confirmed. Conflicts blocked automatically.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMART VALIDATION -->
+    <section class="section validation-section" id="validation">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-tag">Core Innovation</span>
+          <h2 class="section-title">Every shift. Three smart checks.</h2>
+          <p class="section-sub">Before any shift is confirmed, SmartShift runs three checks to prevent scheduling mistakes.</p>
+        </div>
+        <div class="val-grid">
+          <div class="val-card reveal">
+            <div class="val-icon">🎯</div>
+            <h3>SKILL CHECK</h3>
+            <p>"Does the employee have the required skill or certification?"</p>
+          </div>
+          <div class="val-card reveal">
+            <div class="val-icon">📅</div>
+            <h3>AVAILABILITY CHECK</h3>
+            <p>"Is the employee available during the selected shift?"</p>
+          </div>
+          <div class="val-card reveal">
+            <div class="val-icon">⏰</div>
+            <h3>OVERTIME CHECK</h3>
+            <p>"Will the employee exceed their maximum weekly hours?"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="container cta-inner reveal">
+        <h2 class="cta-heading">Make scheduling smarter with SmartShift.</h2>
+        <p class="cta-sub">Empower your team. Eliminate conflict. Build better rosters — automatically.</p>
+        <button class="btn btn-primary btn-lg spa-nav-link" data-target-view="employee">Get Started Now</button>
+      </div>
+    </section>
+
+  </div>
+
+
+  <!-- ======================================================
+       VIEW 2: LOGIN VIEW (#view-login)
+       ====================================================== -->
+  <div id="view-login" class="app-view">
+    <div class="login-wrapper">
+      <div class="login-container">
+        <div class="logo-section">
+          <div class="logo">⚙️ SmartShift</div>
+          <div class="tagline">Sign in to your account</div>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="loginRoleSelect" style="display:block; font-weight:600; margin-bottom:5px;">Select Portal / Role</label>
+            <select id="loginRoleSelect" style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db; font-size:14px;">
+              <option value="employee">👨‍🍳 Staff / Employee View (Alex Rivera)</option>
+              <option value="manager">🛡️ Manager Admin View (Shift Matrix)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="email" style="display:block; font-weight:600; margin-bottom:5px;">Email Address</label>
+            <input type="email" id="email" placeholder="alex.rivera@smartshift.com" value="alex.rivera@smartshift.com" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 15px;">
+            <label for="password" style="display:block; font-weight:600; margin-bottom:5px;">Password</label>
+            <input type="password" id="password" value="••••••••" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db;">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:16px;">Sign In to SmartShift</button>
+        </form>
+
+        <div style="text-align:center; margin-top:20px;">
+          <a href="#" data-target-view="landing" class="spa-nav-link" style="color:var(--primary); font-size:14px; text-decoration:none;">← Back to Landing Page</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================
+       VIEW 3: EMPLOYEE STAFF PORTAL (#view-employee)
+       ====================================================== -->
+  <div id="view-employee" class="app-view">
+    <!-- Staff Portal Header Banner -->
+    <div class="portal-header">
+      <div class="container">
+        <div class="portal-title-row">
+          <div class="staff-info-card">
+            <div class="staff-avatar-large">👨‍🍳</div>
+            <div>
+              <h2 style="font-size:1.5rem; font-weight:800;">Alex Rivera</h2>
+              <p style="font-size:0.9rem; color:var(--text-secondary);">
+                Part-Time Barista &bull; Certifications: <span class="badge badge-success">Barista</span> <span class="badge badge-info">Food Safety</span>
+              </p>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:1rem;">
+            <div class="hours-metric-card">
+              <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Confirmed Work Hours</div>
+              <div class="hours-value"><span id="empConfirmedHours">18</span> / 25 hrs</div>
+            </div>
+            <div class="hours-metric-card">
+              <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Est. Weekly Pay</div>
+              <div class="hours-value" style="color:var(--primary);">Rs. 4,500</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-bottom: 4rem;">
+      <div class="availability-container">
+        <div class="grid-header-row">
+          <div>
+            <h3 style="font-size:1.25rem; font-weight:800;">Weekly Availability Submission</h3>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.2rem;">
+              Click any cell to cycle status: <strong>Available &rarr; Preferred &rarr; Unavailable</strong>
+            </p>
+          </div>
+
+          <div class="legend-group">
+            <div class="legend-item">
+              <div class="legend-dot dot-available"></div>
+              <span>Available</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dot-preferred"></div>
+              <span>Preferred ⭐</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dot-unavailable"></div>
+              <span>Unavailable ✕</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timetable Grid -->
+        <div class="timetable-grid" id="availabilityGrid">
+          <!-- Dynamically generated by employee.js -->
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button id="btnSaveAvailability" class="btn btn-primary btn-lg">
+            💾 Save My Schedule
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+
+  <!-- ======================================================
+       VIEW 4: MANAGER SHIFT MATRIX VIEW (#view-manager)
+       ====================================================== -->
+  <div id="view-manager" class="app-view">
+    <!-- Toolbar & Filters -->
+    <div class="manager-toolbar">
+      <div class="container">
+        <div class="toolbar-flex">
+          <div>
+            <h2 style="font-size:1.5rem; font-weight:800;">Downtown Cafe - Weekly Schedule</h2>
+            <p style="font-size:0.85rem; color:var(--text-secondary);">Week of Sept 1 &ndash; Sept 7 &bull; Smart Conflict Prevention Active 🛡️</p>
+          </div>
+          <div class="filter-pills">
+            <button class="filter-pill active" data-filter="all">All Roles</button>
+            <button class="filter-pill" data-filter="Barista">Baristas</button>
+            <button class="filter-pill" data-filter="Cashier">Cashiers</button>
+            <button class="filter-pill" data-filter="Food Safety">Kitchen/Prep</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Management View -->
+    <main class="container" style="padding-bottom: 4rem;">
+      <div class="manager-stats-grid">
+        <div class="manager-stat-card">
+          <div class="stat-label">Total Shifts</div>
+          <div class="stat-num" id="statTotalShifts">4</div>
+        </div>
+        <div class="manager-stat-card">
+          <div class="stat-label">Assigned Slots</div>
+          <div class="stat-num" style="color:var(--primary);" id="statAssigned">1</div>
+        </div>
+        <div class="manager-stat-card">
+          <div class="stat-label">Unassigned / Open</div>
+          <div class="stat-num" style="color:var(--warning);" id="statUnassigned">3</div>
+        </div>
+        <div class="manager-stat-card">
+          <div class="stat-label">Est. Budget</div>
+          <div class="stat-num" style="color:var(--accent-blue);">Rs. 24,500</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
+        <button id="btnPublishRoster" class="btn btn-primary">
+          <span>🚀 Publish Weekly Roster</span>
+        </button>
+      </div>
+
+      <!-- Shift Roster Columns -->
+      <div class="roster-grid-container" id="managerRosterGrid">
+        <!-- Populated dynamically by manager.js -->
+      </div>
+    </main>
+
+    <!-- Shift Assignment & Smart Validation Modal -->
+    <div id="assignModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 id="assignModalTitle">Assign Staff to Shift</h3>
+          <button id="btnCloseAssignModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="shift-details-banner" id="modalShiftBanner">
+            <!-- Populated dynamically -->
+          </div>
+          <div style="margin-bottom:1.2rem;">
+            <label style="display:block; font-weight:700; margin-bottom:0.4rem;">Select Worker to Assign:</label>
+            <select id="modalWorkerSelect" class="form-select">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div style="margin-bottom:1.2rem;">
+            <label style="display:block; font-weight:700; margin-bottom:0.4rem;">Live Smart Validation Engine Output:</label>
+            <div id="validationFeedbackArea">
+              <!-- Rendered by manager.js / validation.js -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancelModal" class="btn btn-outline">Cancel</button>
+          <button id="btnConfirmAssign" class="btn btn-primary" disabled>Confirm Shift Assignment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ======================================================
+       FOOTER & TOAST
+       ====================================================== -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="#" data-target-view="landing" class="brand spa-nav-link">
+          <span class="brand-icon">⚡</span>
+          <span>SmartShift</span>
+        </a>
+        <p class="footer-desc">A centralized scheduling platform for cafes, restaurants, and retail stores.</p>
+      </div>
+      <div class="footer-links-col">
+        <h4>Views Navigation</h4>
+        <ul>
+          <li><a href="#" data-target-view="landing" class="spa-nav-link">Home Landing Page</a></li>
+          <li><a href="#" data-target-view="login" class="spa-nav-link">Login Portal</a></li>
+          <li><a href="#" data-target-view="employee" class="spa-nav-link">Staff Portal</a></li>
+          <li><a href="#" data-target-view="manager" class="spa-nav-link">Manager Shift Matrix</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 SmartShift. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/mockData.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/employee.js"></script>
+  <script src="js/manager.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/animations.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('✅ SmartShift SPA — Unified Single-File Application Initialized Successfully!');
+    });
+  </script>
+</body>
+</html>
