@@ -187,7 +187,7 @@
 
 .badge-dot {
   width: 7px; height: 7px;
-  background: var(--primary-light);
+  background: var(--accent, #FF6808);
   border-radius: 50%;
   animation: blink 2.2s ease-in-out infinite;
 }
