@@ -1,0 +1,28 @@
+<svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="validGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield icon -->
+  <g transform="translate(10, 10)">
+    <path d="M 15 2 L 25 6 L 25 15 Q 15 22 15 25 Q 15 22 5 15 L 5 6 Z" fill="url(#validGrad)" opacity="0.3" stroke="#14b8a6" stroke-width="1"/>
+    <circle cx="15" cy="14" r="4" fill="#14b8a6"/>
+  </g>
+  
+  <!-- Main text -->
+  <text x="50" y="40" font-family="Plus Jakarta Sans, Arial" font-size="28" font-weight="800" fill="#e2e8f0">
+    Smart Validation
+  </text>
+  
+  <!-- Three check circles -->
+  <circle cx="320" cy="20" r="5" fill="none" stroke="#14b8a6" stroke-width="1.5"/>
+  <circle cx="345" cy="20" r="5" fill="none" stroke="#2dd4bf" stroke-width="1.5"/>
+  <circle cx="370" cy="20" r="5" fill="none" stroke="#14b8a6" stroke-width="1.5"/>
+  
+  <text x="317" y="24" font-size="8" fill="#14b8a6" font-weight="bold">✓</text>
+  <text x="342" y="24" font-size="8" fill="#2dd4bf" font-weight="bold">✓</text>
+  <text x="367" y="24" font-size="8" fill="#14b8a6" font-weight="bold">✓</text>
+</svg>

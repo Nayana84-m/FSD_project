@@ -1,0 +1,26 @@
+<svg viewBox="0 0 400 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="featureGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2dd4bf;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Feature icons -->
+  <g transform="translate(15, 15)">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="url(#featureGrad)" opacity="0.2"/>
+    <circle cx="5" cy="5" r="2" fill="#14b8a6"/>
+    <circle cx="15" cy="5" r="2" fill="#2dd4bf"/>
+    <circle cx="5" cy="15" r="2" fill="#2dd4bf"/>
+    <circle cx="15" cy="15" r="2" fill="#14b8a6"/>
+  </g>
+  
+  <!-- Main text -->
+  <text x="50" y="40" font-family="Plus Jakarta Sans, Arial" font-size="28" font-weight="800" fill="#e2e8f0">
+    Core Platform
+  </text>
+  
+  <!-- Decorative line -->
+  <line x1="340" y1="30" x2="385" y2="30" stroke="#14b8a6" stroke-width="2" opacity="0.6"/>
+</svg>

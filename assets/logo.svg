@@ -1,0 +1,18 @@
+<svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2dd4bf;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Bolt Icon -->
+  <g transform="translate(5, 8)">
+    <path d="M12 2 L6 14 L10 14 L4 28 L16 12 L12 12 L18 2 Z" fill="url(#logoGrad)" stroke="none"/>
+  </g>
+  
+  <!-- Text: SmartShift -->
+  <text x="32" y="28" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#e2e8f0">
+    SmartShift
+  </text>
+</svg>
