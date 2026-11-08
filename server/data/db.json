@@ -1,0 +1,21 @@
+{
+  "users": [
+    {
+      "id": "manager-1",
+      "name": "Maya Chen",
+      "email": "manager@smartshift.local",
+      "role": "manager",
+      "password": "manager123"
+    },
+    {
+      "id": "emp1",
+      "name": "Alex Rivera",
+      "email": "alex.rivera@smartshift.com",
+      "role": "employee",
+      "password": "employee123"
+    }
+  ],
+  "workers": [],
+  "shifts": [],
+  "auditLog": []
+}
