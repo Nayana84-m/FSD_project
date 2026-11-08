@@ -109,6 +109,9 @@ button:disabled { cursor: not-allowed; opacity: 0.62; }
 .profile-detail span { color: var(--text-secondary); }
 .profile-card #btnLogout { margin-top: 0.25rem; }
 
+body.workspace-mode .footer { display: none; }
+body.workspace-mode .brand { pointer-events: none; }
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   color: var(--text-main);

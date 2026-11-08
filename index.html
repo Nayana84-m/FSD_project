@@ -104,11 +104,11 @@
 
       <!-- Desktop Links -->
       <nav class="nav-links" id="navLinks">
-        <a href="#" data-target-view="landing" class="nav-link spa-nav-link active">Home</a>
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#how-it-works" class="nav-link">How It Works</a>
-        <a href="#" data-target-view="employee" class="nav-link spa-nav-link">Staff Portal</a>
-        <a href="#" data-target-view="manager" class="nav-link spa-nav-link">Manager Matrix</a>
+        <a href="#" data-public-nav="true" data-target-view="landing" class="nav-link spa-nav-link active">Home</a>
+        <a href="#features" data-public-nav="true" class="nav-link">Features</a>
+        <a href="#how-it-works" data-public-nav="true" class="nav-link">How It Works</a>
+        <a href="#" data-role-nav="employee" data-target-view="employee" class="nav-link spa-nav-link">Staff Dashboard</a>
+        <a href="#" data-role-nav="manager" data-target-view="manager" class="nav-link spa-nav-link">Manager Dashboard</a>
       </nav>
 
       <div class="nav-actions">
@@ -127,8 +127,8 @@
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
       <a href="#" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
-      <a href="#" data-target-view="employee" class="mobile-link spa-nav-link">Staff Portal</a>
-      <a href="#" data-target-view="manager" class="mobile-link spa-nav-link">Manager Matrix</a>
+      <a href="#" data-role-nav="employee" data-target-view="employee" class="mobile-link spa-nav-link">Staff Dashboard</a>
+      <a href="#" data-role-nav="manager" data-target-view="manager" class="mobile-link spa-nav-link">Manager Dashboard</a>
       <div class="mobile-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStartedM">Staff Portal</button>

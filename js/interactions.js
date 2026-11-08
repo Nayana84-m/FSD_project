@@ -97,6 +97,17 @@ function updateAuthNav() {
   const loginButton = document.getElementById('btnLogin');
   if (profileButton) profileButton.hidden = !session;
   if (loginButton) loginButton.hidden = Boolean(session);
+  document.body.classList.toggle('workspace-mode', Boolean(session));
+  document.querySelectorAll('[data-public-nav="true"]').forEach(link => { link.hidden = Boolean(session); });
+  document.querySelectorAll('[data-role-nav]').forEach(link => { link.hidden = !session || link.dataset.roleNav !== session.role; });
+  const staffButton = document.getElementById('btnGetStarted');
+  const mobileStaffButton = document.getElementById('btnGetStartedM');
+  const managerButton = document.querySelector('[data-target-view="manager"].btn-outline');
+  const mobileManagerButton = document.querySelector('.mobile-actions [data-target-view="manager"]');
+  if (staffButton) staffButton.hidden = Boolean(session);
+  if (mobileStaffButton) mobileStaffButton.hidden = Boolean(session);
+  if (managerButton) managerButton.hidden = Boolean(session);
+  if (mobileManagerButton) mobileManagerButton.hidden = Boolean(session);
 }
 
 function renderProfile() {
@@ -165,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnLogout')?.addEventListener('click', () => {
     window.SmartShiftAuth?.clearSession();
     window.localStorage.removeItem('smartshift-token');
+    updateAuthNav();
     showToast('You have been logged out safely.', 'success');
     switchView('login');
   });
