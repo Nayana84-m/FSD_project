@@ -298,14 +298,15 @@ function initManagerSetup() {
   window.managerSetupInitialized = true;
   renderStaffDirectory();
   const shiftCard = document.getElementById('shiftFormCard');
-  const staffCard = document.getElementById('staffFormCard');
+  const staffFormCard = document.getElementById('staffFormCard');
+  const directoryCard = document.getElementById('staffDirectoryCard');
   const toggle = (card, open) => { if (card) card.hidden = !open; };
   document.getElementById('btnOpenShiftForm')?.addEventListener('click', () => toggle(shiftCard, true));
   document.getElementById('btnCloseShiftForm')?.addEventListener('click', () => toggle(shiftCard, false));
-  document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => toggle(staffCard, true));
-  document.getElementById('btnCloseStaffForm')?.addEventListener('click', () => toggle(staffCard, false));
+  document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => toggle(staffFormCard, true));
+  document.getElementById('btnCloseStaffForm')?.addEventListener('click', () => toggle(staffFormCard, false));
   document.getElementById('btnToggleStaffDirectory')?.addEventListener('click', event => {
-    const open = staffCard.classList.toggle('is-collapsed') === false;
+    const open = directoryCard.classList.toggle('is-collapsed') === false;
     event.currentTarget.textContent = open ? 'Hide team' : 'Show team';
     event.currentTarget.setAttribute('aria-expanded', String(open));
   });
