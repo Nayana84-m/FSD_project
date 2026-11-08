@@ -43,6 +43,9 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
 }
 
+.filter-empty { grid-column: 1 / -1; display: grid; gap: 0.35rem; place-items: center; padding: 3rem 1rem; border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); color: var(--text-secondary); text-align: center; background: white; }
+.filter-empty strong { color: var(--text-main); font-size: 1rem; }
+
 .manager-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

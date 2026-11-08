@@ -28,7 +28,13 @@ function initRosterGrid() {
   const shifts = window.mockDatabase.shifts;
   const filteredShifts = currentFilter === "all" 
     ? shifts 
-    : shifts.filter(s => s.requiredRole === currentFilter);
+    : shifts.filter(s => String(s.requiredRole).trim().toLowerCase() === currentFilter.trim().toLowerCase());
+
+  if (!filteredShifts.length) {
+    container.innerHTML = `<div class="filter-empty"><strong>No ${currentFilter} shifts yet.</strong><span>Create a shift with this skill to see it here.</span></div>`;
+    updateStatsCounters();
+    return;
+  }
 
   const groupedByDay = {};
   filteredShifts.forEach(s => {
@@ -102,10 +108,20 @@ function initRosterGrid() {
 function initFilterPills() {
   const pills = document.querySelectorAll(".filter-pill");
   pills.forEach(pill => {
+    const isActive = pill.dataset.filter === currentFilter;
+    pill.classList.toggle("active", isActive);
+    pill.setAttribute("aria-pressed", String(isActive));
+  });
+  pills.forEach(pill => {
+    if (pill.dataset.filterBound === "true") return;
+    pill.dataset.filterBound = "true";
     pill.addEventListener("click", () => {
-      pills.forEach(p => p.classList.remove("active"));
-      pill.classList.add("active");
       currentFilter = pill.dataset.filter;
+      pills.forEach(p => {
+        const isActive = p === pill;
+        p.classList.toggle("active", isActive);
+        p.setAttribute("aria-pressed", String(isActive));
+      });
       initRosterGrid();
     });
   });
