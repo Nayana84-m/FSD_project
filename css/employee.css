@@ -60,6 +60,22 @@
   margin-bottom: 2.5rem;
 }
 
+.employee-secondary-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+.leave-card { margin-bottom: 2rem; }
+.leave-balance { display: grid; text-align: right; }
+.leave-balance strong { color: var(--primary); font-size: 1.35rem; }
+.leave-balance span { color: var(--text-secondary); font-size: 0.75rem; }
+.leave-request-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; align-items: end; }
+.leave-request-form label { display: grid; gap: 0.3rem; color: var(--text-secondary); font-size: 0.76rem; font-weight: 700; }
+.leave-request-form input, .leave-request-form select { border: 1px solid var(--border-strong); border-radius: 9px; padding: 0.65rem 0.7rem; background: white; }
+.leave-request-list { display: grid; gap: 0.55rem; margin-top: 1rem; }
+.leave-request-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem; border-radius: 10px; background: var(--bg-page); font-size: 0.8rem; }
+.leave-request-row small { display: block; color: var(--text-secondary); margin-top: 0.15rem; }
+.leave-status { text-transform: capitalize; color: var(--accent-amber); }
+.leave-status.approved { color: var(--success); }
+.leave-status.rejected { color: var(--danger); }
+.empty-state { color: var(--text-secondary); font-size: 0.82rem; }
+
 .grid-header-row {
   display: flex;
   justify-content: space-between;

@@ -5,6 +5,7 @@
  */
 
 const mockDatabase = {
+  leaveRequests: [],
   // Workers / Part-Time Employees Collection
   workers: [
     {

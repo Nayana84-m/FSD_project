@@ -466,6 +466,21 @@
           </button>
         </div>
       </div>
+      <section class="employee-secondary-grid">
+        <div class="availability-container leave-card">
+          <div class="grid-header-row">
+            <div><h3 style="font-size:1.15rem; font-weight:800;">Leave & time off</h3><p style="font-size:0.85rem; color:var(--text-secondary);">Request time off and keep your manager informed.</p></div>
+            <div class="leave-balance"><strong id="empLeaveBalance">12</strong><span>days available</span></div>
+          </div>
+          <form id="leaveRequestForm" class="leave-request-form">
+            <label>From<input type="date" id="leaveStartDate" required></label>
+            <label>To<input type="date" id="leaveEndDate" required></label>
+            <label>Reason<select id="leaveReason"><option>Personal leave</option><option>Medical leave</option><option>Holiday</option></select></label>
+            <button type="submit" class="btn btn-outline">Request leave</button>
+          </form>
+          <div id="employeeLeaveRequests" class="leave-request-list"></div>
+        </div>
+      </section>
     </main>
   </div>
 

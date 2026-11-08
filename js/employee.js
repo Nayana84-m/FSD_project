@@ -6,6 +6,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   initAvailabilityGrid();
   initSaveButton();
+  initLeaveRequestForm();
 });
 
 const daysOfWeek = [
@@ -43,6 +44,7 @@ function renderEmployeeSummary() {
   const hours = document.getElementById('empConfirmedHours');
   const maxHours = document.getElementById('empMaxHours');
   const pay = document.getElementById('empEstimatedPay');
+  const leaveBalance = document.getElementById('empLeaveBalance');
   if (name) name.textContent = worker.name;
   if (role) role.textContent = worker.role;
   if (certifications) certifications.innerHTML = (worker.certifications || []).length
@@ -51,6 +53,34 @@ function renderEmployeeSummary() {
   if (hours) hours.textContent = worker.currentAssignedHours || 0;
   if (maxHours) maxHours.textContent = worker.maxWeeklyHours || 25;
   if (pay) pay.textContent = ((worker.currentAssignedHours || 0) * (worker.hourlyRate || 0)).toLocaleString('en-IN');
+  if (leaveBalance) leaveBalance.textContent = worker.leaveBalance ?? 12;
+  renderLeaveRequests(worker);
+}
+
+function renderLeaveRequests(worker) {
+  const list = document.getElementById('employeeLeaveRequests');
+  if (!list) return;
+  const requests = (window.mockDatabase.leaveRequests || []).filter(request => request.workerId === worker.id).slice().reverse();
+  list.innerHTML = requests.length ? requests.map(request => `<div class="leave-request-row"><span>${request.startDate} → ${request.endDate}<small>${request.reason}</small></span><strong class="leave-status ${request.status}">${request.status}</strong></div>`).join('') : '<p class="empty-state">No leave requests yet.</p>';
+}
+
+function initLeaveRequestForm() {
+  const form = document.getElementById('leaveRequestForm');
+  if (!form || form.dataset.bound) return;
+  form.dataset.bound = 'true';
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const worker = resolveCurrentWorker();
+    const startDate = document.getElementById('leaveStartDate').value;
+    const endDate = document.getElementById('leaveEndDate').value;
+    if (endDate < startDate) return window.showToast?.('Leave end date must be after the start date.', 'danger', 9000);
+    window.mockDatabase.leaveRequests = window.mockDatabase.leaveRequests || [];
+    window.mockDatabase.leaveRequests.push({ id: `leave_${Date.now()}`, workerId: worker.id, startDate, endDate, reason: document.getElementById('leaveReason').value, status: 'pending' });
+    window.persistMockDatabase?.();
+    renderLeaveRequests(worker);
+    form.reset();
+    window.showToast?.('Leave request sent to your manager.', 'success');
+  });
 }
 
 function initAvailabilityGrid() {
@@ -159,4 +189,5 @@ function initSaveButton() {
 
 window.initAvailabilityGrid = initAvailabilityGrid;
 window.initSaveButton = initSaveButton;
+window.initLeaveRequestForm = initLeaveRequestForm;
 

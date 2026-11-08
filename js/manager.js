@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentFilter = "all";
 let activeShiftToAssign = null;
 
+function recommendationScore(worker, shift) {
+  const result = window.SmartValidator.validateAssignment(worker.id, shift.id);
+  const preferred = worker.availability?.[shift.day]?.[shift.timeSlot] === 'preferred' ? 1 : 0;
+  return (result.isValid ? 100 : 0) + preferred * 10 - (worker.currentAssignedHours || 0);
+}
+
 function initRosterGrid() {
   const container = document.getElementById("managerRosterGrid");
   if (!container) return;
@@ -188,8 +194,10 @@ function attachAssignButtonListeners() {
       }
 
       if (workerSelect) {
-        workerSelect.innerHTML = window.mockDatabase.workers.map(w => {
-          return `<option value="${w.id}">${w.avatar} ${w.name} (${w.role} &bull; ${w.currentAssignedHours}/${w.maxWeeklyHours} hrs &bull; Rs. ${w.hourlyRate}/hr)</option>`;
+        const rankedWorkers = window.mockDatabase.workers.slice().sort((a, b) => recommendationScore(b, activeShiftToAssign) - recommendationScore(a, activeShiftToAssign));
+        workerSelect.innerHTML = rankedWorkers.map((w, index) => {
+          const recommendation = recommendationScore(w, activeShiftToAssign) >= 100 ? (index === 0 ? 'Recommended' : 'Eligible') : 'Conflict';
+          return `<option value="${w.id}">${index === 0 && recommendation === 'Recommended' ? '⭐ ' : ''}${w.avatar || '👤'} ${w.name} — ${recommendation} (${w.role} • ${w.currentAssignedHours}/${w.maxWeeklyHours} hrs • Rs. ${w.hourlyRate}/hr)</option>`;
         }).join("");
 
         const initialWorkerId = workerSelect.value;
@@ -257,7 +265,7 @@ function renderStaffDirectory() {
   container.innerHTML = workers.map(worker => `
     <div class="staff-directory-row">
       <div class="staff-directory-avatar">${worker.avatar || '👤'}</div>
-      <div class="staff-directory-info"><strong>${escapeHtml(worker.name)}</strong><span>${escapeHtml(worker.role)} · ${(worker.certifications || []).join(', ') || 'Skills pending'}</span></div>
+      <div class="staff-directory-info"><strong>${escapeHtml(worker.name)}</strong><span>${escapeHtml(worker.role)} · ${(worker.certifications || []).join(', ') || 'Skills pending'}</span><span>${(window.mockDatabase.leaveRequests || []).filter(request => request.workerId === worker.id && request.status === 'pending').length ? '⏳ Leave request pending' : '✓ No pending leave'}</span></div>
       <div class="staff-directory-hours"><strong>${worker.currentAssignedHours || 0}/${worker.maxWeeklyHours || 0}h</strong><span>Rs. ${worker.hourlyRate || 0}/hr</span></div>
     </div>`).join('');
 }

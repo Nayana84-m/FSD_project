@@ -81,6 +81,8 @@
   .manager-toolbar { padding-inline: 1rem; }
   .toolbar-flex { align-items: flex-start; }
   .roster-grid-container { grid-template-columns: 1fr; }
+  .leave-request-form { grid-template-columns: 1fr 1fr; }
+  .leave-request-form button { grid-column: 1 / -1; }
 
   /* Hero Section */
   .hero { 
