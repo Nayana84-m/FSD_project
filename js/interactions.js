@@ -122,12 +122,17 @@ function renderProfile() {
   document.getElementById('profileDetailRole').textContent = manager ? 'Manager' : 'Staff';
   document.getElementById('profileWorkspaceTitle').textContent = manager ? 'Manager workspace' : 'Staff workspace';
   document.getElementById('profileWorkspaceText').textContent = manager ? 'Create shifts, manage your team, and publish conflict-free rosters.' : 'Share availability, request leave, and view your upcoming work.';
+  const savedBusinessName = window.localStorage.getItem('smartshift-business-name') || 'Downtown Cafe';
+  const businessName = document.getElementById('managerBusinessName');
+  if (businessName) businessName.textContent = savedBusinessName;
   const workspaceButton = document.getElementById('btnProfileWorkspace');
   if (workspaceButton) workspaceButton.textContent = manager ? 'Open manager dashboard' : 'Open staff portal';
   document.getElementById('profileAvatar').textContent = manager ? '🛡️' : '👤';
   document.getElementById('profileEditName').value = session.name || '';
   document.getElementById('profileEditEmail').value = session.email || '';
   document.getElementById('profileStaffFields').hidden = manager;
+  document.getElementById('profileManagerFields').hidden = !manager;
+  if (manager) document.getElementById('profileEditBusiness').value = window.localStorage.getItem('smartshift-business-name') || 'Downtown Cafe';
   if (worker) {
     document.getElementById('profileEditSkills').value = (worker.certifications || []).join(', ');
     document.getElementById('profileEditMaxHours').value = worker.maxWeeklyHours || 25;
@@ -204,6 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
         worker.hourlyRate = Number(document.getElementById('profileEditRate').value);
         window.persistMockDatabase?.();
       }
+    } else {
+      window.localStorage.setItem('smartshift-business-name', document.getElementById('profileEditBusiness').value.trim() || 'Downtown Cafe');
+      const businessName = document.getElementById('managerBusinessName');
+      if (businessName) businessName.textContent = window.localStorage.getItem('smartshift-business-name');
     }
     updateAuthNav();
     renderProfile();
