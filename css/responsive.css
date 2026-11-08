@@ -87,6 +87,9 @@
   .profile-grid { grid-template-columns: 1fr; }
   .profile-hero { align-items: flex-start; padding: 1.25rem; }
   .manager-menu-toggle { order: -1; }
+  .manager-leave-row { align-items: flex-start; flex-direction: column; }
+  .manager-leave-actions { width: 100%; }
+  .manager-leave-actions .btn { flex: 1; justify-content: center; }
 
   /* Hero Section */
   .hero { 

@@ -290,13 +290,49 @@ function renderStaffDirectory() {
     </div>`).join('');
 }
 
+function renderLeaveApprovals() {
+  const container = document.getElementById('managerLeaveRequests');
+  const badge = document.getElementById('pendingLeaveBadge');
+  if (!container) return;
+  const requests = window.mockDatabase.leaveRequests || [];
+  const pending = requests.filter(request => request.status === 'pending');
+  if (badge) badge.textContent = `${pending.length} pending`;
+  if (!pending.length) {
+    container.innerHTML = '<p class="empty-state">No pending leave requests. Your team is up to date.</p>';
+    return;
+  }
+  container.innerHTML = pending.map(request => {
+    const worker = window.mockDatabase.workers.find(item => item.id === request.workerId);
+    return `<div class="manager-leave-row"><div class="manager-leave-info"><strong>${escapeHtml(worker?.name || 'Team member')}</strong><span>${request.startDate} → ${request.endDate} · ${escapeHtml(request.reason)}</span></div><div class="manager-leave-actions"><button class="btn btn-outline leave-action" data-leave-id="${request.id}" data-leave-action="rejected">Reject</button><button class="btn btn-primary leave-action" data-leave-id="${request.id}" data-leave-action="approved">Approve</button></div></div>`;
+  }).join('');
+}
+
+function processLeaveRequest(requestId, action) {
+  const request = (window.mockDatabase.leaveRequests || []).find(item => item.id === requestId);
+  if (!request) return;
+  request.status = action;
+  if (action === 'approved') {
+    const worker = window.mockDatabase.workers.find(item => item.id === request.workerId);
+    const start = new Date(`${request.startDate}T12:00:00`);
+    const end = new Date(`${request.endDate}T12:00:00`);
+    const days = Math.max(1, Math.round((end - start) / 86400000) + 1);
+    if (worker) worker.leaveBalance = Math.max(0, (worker.leaveBalance ?? 12) - days);
+  }
+  window.persistMockDatabase?.();
+  renderLeaveApprovals();
+  renderStaffDirectory();
+  window.showToast?.(`Leave request ${action}.`, action === 'approved' ? 'success' : 'info');
+}
+
 function initManagerSetup() {
   if (window.managerSetupInitialized) {
     renderStaffDirectory();
+    renderLeaveApprovals();
     return;
   }
   window.managerSetupInitialized = true;
   renderStaffDirectory();
+  renderLeaveApprovals();
   const shiftCard = document.getElementById('shiftFormCard');
   const staffFormCard = document.getElementById('staffFormCard');
   const directoryCard = document.getElementById('staffDirectoryCard');
@@ -309,6 +345,10 @@ function initManagerSetup() {
     const open = directoryCard.classList.toggle('is-collapsed') === false;
     event.currentTarget.textContent = open ? 'Hide team' : 'Show team';
     event.currentTarget.setAttribute('aria-expanded', String(open));
+  });
+  document.getElementById('managerLeaveRequests')?.addEventListener('click', event => {
+    const button = event.target.closest('.leave-action');
+    if (button) processLeaveRequest(button.dataset.leaveId, button.dataset.leaveAction);
   });
 
   document.getElementById('createShiftForm')?.addEventListener('submit', event => {

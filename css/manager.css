@@ -79,6 +79,13 @@
 .setup-form { display: grid; gap: 0.8rem; }
 .setup-form label { display: grid; gap: 0.3rem; color: var(--text-secondary); font-size: 0.76rem; font-weight: 700; }
 .setup-form input, .setup-form select { width: 100%; border: 1px solid var(--border-strong); border-radius: 9px; padding: 0.65rem 0.7rem; color: var(--text-main); background: white; }
+.leave-approval-card { grid-column: 1 / -1; }
+.manager-leave-list { display: grid; gap: 0.65rem; }
+.manager-leave-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; }
+.manager-leave-info { display: grid; gap: 0.15rem; font-size: 0.82rem; }
+.manager-leave-info span { color: var(--text-secondary); font-size: 0.74rem; }
+.manager-leave-actions { display: flex; gap: 0.45rem; }
+.manager-leave-actions .btn { padding: 0.42rem 0.7rem; font-size: 0.75rem; }
 
 .manager-stat-card {
   background: white;
