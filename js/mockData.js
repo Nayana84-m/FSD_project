@@ -152,6 +152,14 @@ try {
   console.warn("SmartShift could not restore local demo data.", error);
 }
 
+// Demo requests make the manager approval workflow easy to review locally.
+if (!mockDatabase.leaveRequests.length) {
+  mockDatabase.leaveRequests = [
+    { id: "leave_demo_1", workerId: "emp1", startDate: "2026-11-12", endDate: "2026-11-13", reason: "Personal leave", status: "pending" },
+    { id: "leave_demo_2", workerId: "emp3", startDate: "2026-11-18", endDate: "2026-11-19", reason: "Medical leave", status: "pending" }
+  ];
+}
+
 window.persistMockDatabase = function persistMockDatabase() {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockDatabase));
