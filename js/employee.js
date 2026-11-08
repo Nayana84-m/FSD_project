@@ -63,10 +63,19 @@ function initAvailabilityGrid() {
       cell.dataset.slot = slot.key;
       cell.dataset.status = currentStatus;
 
+      cell.setAttribute("role", "button");
+      cell.setAttribute("tabindex", "0");
+      cell.setAttribute("aria-label", `${day.label} ${slot.label}: ${formatStatusLabel(currentStatus)}`);
       cell.innerHTML = `<span>${formatStatusLabel(currentStatus)}</span>`;
 
       // Tap to cycle status
       cell.addEventListener("click", () => handleSlotClick(cell, day.key, slot.key));
+      cell.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleSlotClick(cell, day.key, slot.key);
+        }
+      });
 
       gridContainer.appendChild(cell);
     });
@@ -86,6 +95,7 @@ function handleSlotClick(cell, dayKey, slotKey) {
   cell.classList.remove("available", "preferred", "unavailable");
   cell.classList.add(nextStatus);
   cell.dataset.status = nextStatus;
+  cell.setAttribute("aria-label", `${cell.dataset.day} ${cell.dataset.slot}: ${formatStatusLabel(nextStatus)}`);
   cell.innerHTML = `<span>${formatStatusLabel(nextStatus)}</span>`;
 
   if (!currentWorker.availability[dayKey]) {
@@ -114,6 +124,8 @@ function initSaveButton() {
       if (window.showToast) {
         window.showToast("Your weekly schedule was saved and synced to your manager! 🎉", "success");
       }
+      if (window.persistMockDatabase) window.persistMockDatabase();
+      if (window.SmartShiftAPI) window.SmartShiftAPI.saveAvailability(currentWorker.id, currentWorker.availability);
     }, 500);
   });
 }
