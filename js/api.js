@@ -22,6 +22,12 @@
       window.localStorage.setItem("smartshift-token", token);
       return result.data.user;
     },
+    async signup(credentials) {
+      const result = await request("/auth/signup", { method: "POST", body: JSON.stringify(credentials) });
+      token = result.data.token;
+      window.localStorage.setItem("smartshift-token", token);
+      return result.data.user;
+    },
     async saveAvailability(workerId, availability) {
       return request(`/workers/${workerId}/availability`, { method: "PUT", body: JSON.stringify({ availability }) });
     },

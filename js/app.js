@@ -5,7 +5,6 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   initLiveDemoModal();
-  initToastSystem();
 });
 
 function showToast(message, type = "success") {

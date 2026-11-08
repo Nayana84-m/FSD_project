@@ -50,11 +50,41 @@
       border-color: var(--primary, #4570FF);
     }
     .login-wrapper {
-      min-height: calc(100vh - 120px);
+      min-height: calc(100vh - 72px);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
+      background: radial-gradient(circle at 15% 10%, rgba(16, 185, 129, 0.12), transparent 32rem), var(--bg-page);
+    }
+    .login-container {
+      width: min(100%, 460px);
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+    }
+    .logo-section { text-align: center; margin-bottom: 1.5rem; }
+    .logo { font: 800 1.65rem var(--font-display); color: var(--text-main); }
+    .tagline, .auth-helper { color: var(--text-secondary); font-size: 0.9rem; }
+    .auth-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .auth-role-card { display: flex; align-items: center; gap: 0.7rem; text-align: left; padding: 0.85rem; background: #fff; border: 1px solid var(--border); border-radius: 14px; color: var(--text-main); }
+    .auth-role-card.active { border-color: var(--primary); background: var(--primary-bg); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12); }
+    .auth-role-icon { font-size: 1.45rem; }
+    .auth-role-card strong, .auth-role-card small { display: block; }
+    .auth-role-card small { color: var(--text-secondary); font-size: 0.7rem; margin-top: 0.15rem; }
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.15rem; }
+    .auth-tab { flex: 1; padding: 0.7rem; border: 0; background: transparent; color: var(--text-secondary); font-weight: 700; border-bottom: 2px solid transparent; }
+    .auth-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .auth-form { display: grid; gap: 1rem; }
+    .auth-form .form-group { display: grid; gap: 0.35rem; }
+    .auth-form label { font-weight: 700; font-size: 0.8rem; }
+    .auth-form input { width: 100%; border: 1px solid var(--border-strong); border-radius: 10px; padding: 0.75rem 0.85rem; }
+    .auth-submit { width: 100%; justify-content: center; padding: 0.8rem; }
+    .auth-footer { text-align: center; margin-top: 1.35rem; color: var(--text-secondary); font-size: 0.8rem; }
+    .auth-footer a { color: var(--primary); font-weight: 700; margin-left: 0.25rem; }
+    [hidden] { display: none !important; }
     }
   </style>
 </head>
@@ -104,20 +134,10 @@
     </div>
   </header>
 
-  <!-- Quick SPA View Switcher Toolbar -->
-  <div class="view-switcher-bar" aria-label="Application preview navigation">
-    <span style="font-weight: 700; color: #475569;">Quick View Switcher:</span>
-    <button class="view-btn-pill spa-nav-link active" data-target-view="landing">🏡 Landing Page</button>
-    <button class="view-btn-pill spa-nav-link" data-target-view="login">🔑 Login</button>
-    <button class="view-btn-pill spa-nav-link" data-target-view="employee">👨‍🍳 Staff Portal</button>
-    <button class="view-btn-pill spa-nav-link" data-target-view="manager">🛡️ Manager Shift Matrix</button>
-  </div>
-
-
   <!-- ======================================================
        VIEW 1: LANDING PAGE VIEW (#view-landing)
        ====================================================== -->
-  <div id="view-landing" class="app-view active">
+  <div id="view-landing" class="app-view">
 
     <!-- HERO -->
     <section class="hero" id="home">
@@ -322,40 +342,52 @@
 
 
   <!-- ======================================================
-       VIEW 2: LOGIN VIEW (#view-login)
+       VIEW 2: AUTHENTICATION (#view-login)
        ====================================================== -->
-  <div id="view-login" class="app-view">
+  <div id="view-login" class="app-view active">
     <div class="login-wrapper">
       <div class="login-container">
         <div class="logo-section">
-          <div class="logo">⚙️ SmartShift</div>
-          <div class="tagline">Sign in to your account</div>
+          <div class="logo">⚡ SmartShift</div>
+          <div class="tagline">Your team schedule, all in one place.</div>
         </div>
 
-        <form id="loginForm">
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label for="loginRoleSelect" style="display:block; font-weight:600; margin-bottom:5px;">Select Portal / Role</label>
-            <select id="loginRoleSelect" style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db; font-size:14px;">
-              <option value="employee">👨‍🍳 Staff / Employee View (Alex Rivera)</option>
-              <option value="manager">🛡️ Manager Admin View (Shift Matrix)</option>
-            </select>
-          </div>
+        <div class="auth-role-grid" role="radiogroup" aria-label="Choose your SmartShift role">
+          <button type="button" class="auth-role-card active" data-role="employee" aria-pressed="true">
+            <span class="auth-role-icon">👨‍🍳</span>
+            <span><strong>Staff</strong><small>View shifts and availability</small></span>
+          </button>
+          <button type="button" class="auth-role-card" data-role="manager" aria-pressed="false">
+            <span class="auth-role-icon">🛡️</span>
+            <span><strong>Manager</strong><small>Build and publish rosters</small></span>
+          </button>
+        </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label for="email" style="display:block; font-weight:600; margin-bottom:5px;">Email Address</label>
-            <input type="email" id="email" placeholder="alex.rivera@smartshift.com" value="alex.rivera@smartshift.com" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db;">
-          </div>
+        <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+          <button type="button" class="auth-tab active" data-auth-mode="login" role="tab" aria-selected="true">Log in</button>
+          <button type="button" class="auth-tab" data-auth-mode="signup" role="tab" aria-selected="false">Create account</button>
+        </div>
 
-          <div class="form-group" style="margin-bottom: 15px;">
-            <label for="password" style="display:block; font-weight:600; margin-bottom:5px;">Password</label>
-            <input type="password" id="password" value="employee123" autocomplete="current-password" required style="width:100%; padding:10px; border-radius:6px; border:1px solid #d1d5db;">
+        <form id="loginForm" class="auth-form">
+          <p class="auth-helper" id="authHelper">Welcome back. Log in to continue to your staff workspace.</p>
+          <div class="form-group">
+            <label for="email">Work email</label>
+            <input type="email" id="email" placeholder="you@company.com" value="alex.rivera@smartshift.com" autocomplete="email" required>
           </div>
-
-          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:16px;">Sign In to SmartShift</button>
+          <div class="form-group signup-only" hidden>
+            <label for="fullName">Full name</label>
+            <input type="text" id="fullName" placeholder="Alex Rivera" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" value="employee123" autocomplete="current-password" minlength="8" required>
+          </div>
+          <button type="submit" class="btn btn-primary auth-submit">Log in to SmartShift</button>
         </form>
 
-        <div style="text-align:center; margin-top:20px;">
-          <a href="#" data-target-view="landing" class="spa-nav-link" style="color:var(--primary); font-size:14px; text-decoration:none;">← Back to Landing Page</a>
+        <div class="auth-footer">
+          <span>Need an overview first?</span>
+          <a href="#" data-target-view="landing" class="spa-nav-link">View the product tour</a>
         </div>
       </div>
     </div>
@@ -556,6 +588,7 @@
 
   <!-- Application Scripts -->
   <script src="js/mockData.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/api.js"></script>
   <script src="js/validation.js"></script>
   <script src="js/employee.js"></script>
