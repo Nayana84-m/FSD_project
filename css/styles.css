@@ -108,6 +108,11 @@ button:disabled { cursor: not-allowed; opacity: 0.62; }
 .profile-detail { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
 .profile-detail span { color: var(--text-secondary); }
 .profile-card #btnLogout { margin-top: 0.25rem; }
+.profile-edit-card { grid-column: 1 / -1; }
+.profile-edit-form { display: grid; gap: 0.85rem; max-width: 720px; }
+.profile-edit-form label { display: grid; gap: 0.3rem; color: var(--text-secondary); font-size: 0.78rem; font-weight: 700; }
+.profile-edit-form input { border: 1px solid var(--border-strong); border-radius: 9px; padding: 0.7rem; background: white; }
+.profile-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 
 body.workspace-mode .footer { display: none; }
 body.workspace-mode .brand { pointer-events: none; }

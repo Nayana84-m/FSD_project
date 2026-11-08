@@ -114,6 +114,7 @@ function renderProfile() {
   const session = window.SmartShiftAuth?.getSession();
   if (!session) return;
   const manager = session.role === 'manager';
+  const worker = !manager ? window.mockDatabase.workers.find(item => item.id === session.id) : null;
   document.getElementById('profileName').textContent = session.name || 'SmartShift user';
   document.getElementById('profileSubtitle').textContent = manager ? 'Manager account · Workspace administrator' : 'Staff account · Availability and shift workspace';
   document.getElementById('profileDetailName').textContent = session.name || '—';
@@ -124,6 +125,14 @@ function renderProfile() {
   const workspaceButton = document.getElementById('btnProfileWorkspace');
   if (workspaceButton) workspaceButton.textContent = manager ? 'Open manager dashboard' : 'Open staff portal';
   document.getElementById('profileAvatar').textContent = manager ? '🛡️' : '👤';
+  document.getElementById('profileEditName').value = session.name || '';
+  document.getElementById('profileEditEmail').value = session.email || '';
+  document.getElementById('profileStaffFields').hidden = manager;
+  if (worker) {
+    document.getElementById('profileEditSkills').value = (worker.certifications || []).join(', ');
+    document.getElementById('profileEditMaxHours').value = worker.maxWeeklyHours || 25;
+    document.getElementById('profileEditRate').value = worker.hourlyRate || 200;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -179,6 +188,26 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAuthNav();
     showToast('You have been logged out safely.', 'success');
     switchView('login');
+  });
+  document.getElementById('profileEditForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const session = window.SmartShiftAuth?.getSession();
+    if (!session) return switchView('login');
+    const updatedUser = { ...session, name: document.getElementById('profileEditName').value.trim(), email: document.getElementById('profileEditEmail').value.trim() };
+    window.SmartShiftAuth.setSession(updatedUser);
+    if (session.role === 'employee') {
+      const worker = window.mockDatabase.workers.find(item => item.id === session.id);
+      if (worker) {
+        worker.name = updatedUser.name;
+        worker.certifications = document.getElementById('profileEditSkills').value.split(',').map(skill => skill.trim()).filter(Boolean);
+        worker.maxWeeklyHours = Number(document.getElementById('profileEditMaxHours').value);
+        worker.hourlyRate = Number(document.getElementById('profileEditRate').value);
+        window.persistMockDatabase?.();
+      }
+    }
+    updateAuthNav();
+    renderProfile();
+    window.showToast?.('Profile details saved.', 'success');
   });
 
   // Authentication mode, role selection, login and signup.
