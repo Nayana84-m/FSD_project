@@ -27,7 +27,34 @@ const timeSlots = [
 // Current logged-in worker (Alex Rivera)
 let currentWorker = window.mockDatabase.workers[0];
 
+function resolveCurrentWorker() {
+  const session = window.SmartShiftAuth?.getSession();
+  if (session?.role === 'employee') {
+    currentWorker = window.mockDatabase.workers.find(worker => worker.id === session.id) || currentWorker;
+  }
+  return currentWorker;
+}
+
+function renderEmployeeSummary() {
+  const worker = resolveCurrentWorker();
+  const name = document.getElementById('employeeName');
+  const role = document.getElementById('employeeRole');
+  const certifications = document.getElementById('employeeCertifications');
+  const hours = document.getElementById('empConfirmedHours');
+  const maxHours = document.getElementById('empMaxHours');
+  const pay = document.getElementById('empEstimatedPay');
+  if (name) name.textContent = worker.name;
+  if (role) role.textContent = worker.role;
+  if (certifications) certifications.innerHTML = (worker.certifications || []).length
+    ? worker.certifications.map(skill => `<span class="badge badge-info">${skill}</span>`).join(' ')
+    : '<span class="badge">Skills pending</span>';
+  if (hours) hours.textContent = worker.currentAssignedHours || 0;
+  if (maxHours) maxHours.textContent = worker.maxWeeklyHours || 25;
+  if (pay) pay.textContent = ((worker.currentAssignedHours || 0) * (worker.hourlyRate || 0)).toLocaleString('en-IN');
+}
+
 function initAvailabilityGrid() {
+  renderEmployeeSummary();
   const gridContainer = document.getElementById("availabilityGrid");
   if (!gridContainer) return;
 

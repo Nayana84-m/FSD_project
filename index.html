@@ -407,9 +407,9 @@
           <div class="staff-info-card">
             <div class="staff-avatar-large">👨‍🍳</div>
             <div>
-              <h2 style="font-size:1.5rem; font-weight:800;">Alex Rivera</h2>
+              <h2 id="employeeName" style="font-size:1.5rem; font-weight:800;">Alex Rivera</h2>
               <p style="font-size:0.9rem; color:var(--text-secondary);">
-                Part-Time Barista &bull; Certifications: <span class="badge badge-success">Barista</span> <span class="badge badge-info">Food Safety</span>
+                <span id="employeeRole">Part-Time Barista</span> &bull; Certifications: <span id="employeeCertifications"><span class="badge badge-success">Barista</span> <span class="badge badge-info">Food Safety</span></span>
               </p>
             </div>
           </div>
@@ -417,11 +417,11 @@
           <div style="display:flex; gap:1rem;">
             <div class="hours-metric-card">
               <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Confirmed Work Hours</div>
-              <div class="hours-value"><span id="empConfirmedHours">18</span> / 25 hrs</div>
+              <div class="hours-value"><span id="empConfirmedHours">18</span> / <span id="empMaxHours">25</span> hrs</div>
             </div>
             <div class="hours-metric-card">
               <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Est. Weekly Pay</div>
-              <div class="hours-value" style="color:var(--primary);">Rs. 4,500</div>
+              <div class="hours-value" style="color:var(--primary);">Rs. <span id="empEstimatedPay">4,500</span></div>
             </div>
           </div>
         </div>
@@ -480,13 +480,17 @@
         <div class="toolbar-flex">
           <div>
             <h2 style="font-size:1.5rem; font-weight:800;">Downtown Cafe - Weekly Schedule</h2>
-            <p style="font-size:0.85rem; color:var(--text-secondary);">Week of Sept 1 &ndash; Sept 7 &bull; Smart Conflict Prevention Active 🛡️</p>
+            <p style="font-size:0.85rem; color:var(--text-secondary);"><span id="managerBusinessName">Downtown Cafe</span> &bull; Smart Conflict Prevention Active 🛡️</p>
           </div>
           <div class="filter-pills">
             <button class="filter-pill active" data-filter="all">All Roles</button>
             <button class="filter-pill" data-filter="Barista">Baristas</button>
             <button class="filter-pill" data-filter="Cashier">Cashiers</button>
             <button class="filter-pill" data-filter="Food Safety">Kitchen/Prep</button>
+          </div>
+          <div class="manager-actions">
+            <button id="btnOpenStaffForm" class="btn btn-outline">+ Add staff</button>
+            <button id="btnOpenShiftForm" class="btn btn-primary">+ Create shift</button>
           </div>
         </div>
       </div>
@@ -518,6 +522,34 @@
           <span>🚀 Publish Weekly Roster</span>
         </button>
       </div>
+
+      <section class="manager-setup-grid" aria-label="Team setup">
+        <div class="setup-card" id="staffDirectoryCard">
+          <div class="setup-card-heading"><div><span class="section-tag">Your team</span><h3>Staff directory</h3></div><span id="staffCountBadge" class="badge badge-info">0 people</span></div>
+          <div id="staffDirectory" class="staff-directory"></div>
+        </div>
+        <div class="setup-card" id="shiftFormCard" hidden>
+          <div class="setup-card-heading"><div><span class="section-tag">Plan ahead</span><h3>Create a shift</h3></div><button id="btnCloseShiftForm" class="modal-close-btn" type="button">&times;</button></div>
+          <form id="createShiftForm" class="setup-form">
+            <label>Day<input type="date" id="newShiftDate" required></label>
+            <label>Time<input type="text" id="newShiftTime" placeholder="8:00 AM - 1:00 PM" required></label>
+            <label>Required skill<select id="newShiftRole"><option>Barista</option><option>Cashier</option><option>Food Safety</option><option>Shift Lead</option></select></label>
+            <label>Hours<input type="number" id="newShiftDuration" min="1" max="12" value="5" required></label>
+            <button class="btn btn-primary" type="submit">Add shift to roster</button>
+          </form>
+        </div>
+        <div class="setup-card" id="staffFormCard" hidden>
+          <div class="setup-card-heading"><div><span class="section-tag">Grow your team</span><h3>Add staff member</h3></div><button id="btnCloseStaffForm" class="modal-close-btn" type="button">&times;</button></div>
+          <form id="addStaffForm" class="setup-form">
+            <label>Full name<input type="text" id="newStaffName" placeholder="Priya Sharma" required></label>
+            <label>Role<select id="newStaffRole"><option>Part-Time Barista</option><option>Part-Time Cashier</option><option>Kitchen Assistant</option></select></label>
+            <label>Skills<input type="text" id="newStaffSkills" placeholder="Barista, Food Safety" required></label>
+            <label>Max weekly hours<input type="number" id="newStaffMaxHours" min="1" max="60" value="25" required></label>
+            <label>Hourly pay (Rs.)<input type="number" id="newStaffRate" min="1" value="250" required></label>
+            <button class="btn btn-primary" type="submit">Add team member</button>
+          </form>
+        </div>
+      </section>
 
       <!-- Shift Roster Columns -->
       <div class="roster-grid-container" id="managerRosterGrid">

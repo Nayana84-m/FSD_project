@@ -59,6 +59,7 @@ function switchView(targetView, scrollToSectionId = null) {
     if (typeof window.initSaveButton === 'function') window.initSaveButton();
   } else if (targetView === 'manager' && typeof window.initRosterGrid === 'function') {
     window.initRosterGrid();
+    if (typeof window.initManagerSetup === 'function') window.initManagerSetup();
     if (typeof window.initAssignModal === 'function') window.initAssignModal();
     if (typeof window.initFilterPills === 'function') window.initFilterPills();
     if (typeof window.initPublishButton === 'function') window.initPublishButton();
@@ -197,6 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
           user = localAuthentication();
         }
         window.SmartShiftAuth.setSession(user);
+        if (selectedRole === 'employee' && !window.mockDatabase.workers.some(worker => worker.id === user.id)) {
+          window.mockDatabase.workers.push({ id: user.id, name: user.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
+          window.persistMockDatabase?.();
+        }
         showToast(`${authMode === 'signup' ? 'Account created' : 'Welcome back'}! Opening your ${selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`, 'success');
         switchView(selectedRole);
       } catch (error) {
@@ -205,6 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const offlineUser = networkError ? localAuthentication() : null;
           if (!offlineUser) throw error;
           window.SmartShiftAuth.setSession(offlineUser);
+          if (selectedRole === 'employee' && !window.mockDatabase.workers.some(worker => worker.id === offlineUser.id)) {
+            window.mockDatabase.workers.push({ id: offlineUser.id, name: offlineUser.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
+            window.persistMockDatabase?.();
+          }
           showToast('API is offline. Local demo mode is enabled and this account is saved in your browser.', 'info', 9000);
           switchView(selectedRole);
         } catch (fallbackError) {

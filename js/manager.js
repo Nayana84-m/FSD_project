@@ -244,7 +244,76 @@ function initPublishButton() {
   });
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+}
+
+function renderStaffDirectory() {
+  const container = document.getElementById('staffDirectory');
+  const badge = document.getElementById('staffCountBadge');
+  if (!container) return;
+  const workers = window.mockDatabase.workers;
+  if (badge) badge.textContent = `${workers.length} ${workers.length === 1 ? 'person' : 'people'}`;
+  container.innerHTML = workers.map(worker => `
+    <div class="staff-directory-row">
+      <div class="staff-directory-avatar">${worker.avatar || '👤'}</div>
+      <div class="staff-directory-info"><strong>${escapeHtml(worker.name)}</strong><span>${escapeHtml(worker.role)} · ${(worker.certifications || []).join(', ') || 'Skills pending'}</span></div>
+      <div class="staff-directory-hours"><strong>${worker.currentAssignedHours || 0}/${worker.maxWeeklyHours || 0}h</strong><span>Rs. ${worker.hourlyRate || 0}/hr</span></div>
+    </div>`).join('');
+}
+
+function initManagerSetup() {
+  if (window.managerSetupInitialized) {
+    renderStaffDirectory();
+    return;
+  }
+  window.managerSetupInitialized = true;
+  renderStaffDirectory();
+  const shiftCard = document.getElementById('shiftFormCard');
+  const staffCard = document.getElementById('staffFormCard');
+  const toggle = (card, open) => { if (card) card.hidden = !open; };
+  document.getElementById('btnOpenShiftForm')?.addEventListener('click', () => toggle(shiftCard, true));
+  document.getElementById('btnCloseShiftForm')?.addEventListener('click', () => toggle(shiftCard, false));
+  document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => toggle(staffCard, true));
+  document.getElementById('btnCloseStaffForm')?.addEventListener('click', () => toggle(staffCard, false));
+
+  document.getElementById('createShiftForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const date = document.getElementById('newShiftDate').value;
+    const role = document.getElementById('newShiftRole').value;
+    const duration = Number(document.getElementById('newShiftDuration').value);
+    const dayName = new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
+    window.mockDatabase.shifts.push({
+      id: `shift_${Date.now()}`, day: dayName.toLowerCase(), dayName, timeSlot: 'morning',
+      timeLabel: document.getElementById('newShiftTime').value, duration, requiredRole: role,
+      department: role === 'Cashier' ? 'Front Register' : role === 'Food Safety' ? 'Kitchen Prep' : 'Cafe Floor', assignedWorkerId: null
+    });
+    window.persistMockDatabase?.();
+    initRosterGrid();
+    toggle(shiftCard, false);
+    event.target.reset();
+    window.showToast?.('Shift added to this week’s roster.', 'success');
+  });
+
+  document.getElementById('addStaffForm')?.addEventListener('submit', event => {
+    event.preventDefault();
+    const skills = document.getElementById('newStaffSkills').value.split(',').map(skill => skill.trim()).filter(Boolean);
+    const worker = {
+      id: `emp_${Date.now()}`, name: document.getElementById('newStaffName').value.trim(), role: document.getElementById('newStaffRole').value,
+      certifications: skills, maxWeeklyHours: Number(document.getElementById('newStaffMaxHours').value), currentAssignedHours: 0,
+      hourlyRate: Number(document.getElementById('newStaffRate').value), availability: {}
+    };
+    window.mockDatabase.workers.push(worker);
+    window.persistMockDatabase?.();
+    renderStaffDirectory();
+    toggle(staffCard, false);
+    event.target.reset();
+    window.showToast?.(`${worker.name} was added to your team.`, 'success');
+  });
+}
+
 window.initRosterGrid = initRosterGrid;
 window.initFilterPills = initFilterPills;
 window.initAssignModal = initAssignModal;
 window.initPublishButton = initPublishButton;
+window.initManagerSetup = initManagerSetup;
