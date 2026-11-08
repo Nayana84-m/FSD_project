@@ -71,6 +71,15 @@
     display: flex; 
   }
 
+  .view-switcher-bar { overflow-x: auto; justify-content: flex-start; padding-inline: 0.75rem; }
+  .view-btn-pill { flex: 0 0 auto; }
+  .login-container { width: min(100% - 2rem, 420px); padding: 1.5rem; }
+  .availability-container { padding: 1rem; overflow-x: auto; }
+  .timetable-grid { min-width: 720px; }
+  .manager-toolbar { padding-inline: 1rem; }
+  .toolbar-flex { align-items: flex-start; }
+  .roster-grid-container { grid-template-columns: 1fr; }
+
   /* Hero Section */
   .hero { 
     padding-top: calc(64px + 3rem); 
