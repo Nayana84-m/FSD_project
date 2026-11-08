@@ -7,10 +7,11 @@
 
 // SPA View Switcher
 function switchView(targetView, scrollToSectionId = null) {
-  const views = ['landing', 'login', 'employee', 'manager'];
+  const views = ['landing', 'login', 'employee', 'manager', 'profile'];
   const session = window.SmartShiftAuth?.getSession();
 
-  if ((targetView === 'employee' || targetView === 'manager') && (!session || session.role !== targetView)) {
+  const wrongRole = (targetView === 'employee' || targetView === 'manager') && (!session || session.role !== targetView);
+  if (wrongRole || (targetView === 'profile' && !session)) {
     targetView = 'login';
     if (window.showToast) window.showToast('Please log in with the matching role to continue.', 'info');
   }
@@ -63,6 +64,8 @@ function switchView(targetView, scrollToSectionId = null) {
     if (typeof window.initAssignModal === 'function') window.initAssignModal();
     if (typeof window.initFilterPills === 'function') window.initFilterPills();
     if (typeof window.initPublishButton === 'function') window.initPublishButton();
+  } else if (targetView === 'profile') {
+    renderProfile();
   }
 }
 
@@ -88,7 +91,32 @@ function showToast(msg, type = 'info', duration = 6000) {
 
 window.showToast = showToast;
 
+function updateAuthNav() {
+  const session = window.SmartShiftAuth?.getSession();
+  const profileButton = document.getElementById('btnProfile');
+  const loginButton = document.getElementById('btnLogin');
+  if (profileButton) profileButton.hidden = !session;
+  if (loginButton) loginButton.hidden = Boolean(session);
+}
+
+function renderProfile() {
+  const session = window.SmartShiftAuth?.getSession();
+  if (!session) return;
+  const manager = session.role === 'manager';
+  document.getElementById('profileName').textContent = session.name || 'SmartShift user';
+  document.getElementById('profileSubtitle').textContent = manager ? 'Manager account · Workspace administrator' : 'Staff account · Availability and shift workspace';
+  document.getElementById('profileDetailName').textContent = session.name || '—';
+  document.getElementById('profileDetailEmail').textContent = session.email || '—';
+  document.getElementById('profileDetailRole').textContent = manager ? 'Manager' : 'Staff';
+  document.getElementById('profileWorkspaceTitle').textContent = manager ? 'Manager workspace' : 'Staff workspace';
+  document.getElementById('profileWorkspaceText').textContent = manager ? 'Create shifts, manage your team, and publish conflict-free rosters.' : 'Share availability, request leave, and view your upcoming work.';
+  const workspaceButton = document.getElementById('btnProfileWorkspace');
+  if (workspaceButton) workspaceButton.textContent = manager ? 'Open manager dashboard' : 'Open staff portal';
+  document.getElementById('profileAvatar').textContent = manager ? '🛡️' : '👤';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  updateAuthNav();
   // Bind all nav links with data-target-view
   document.addEventListener('click', (e) => {
     const targetLink = e.target.closest('[data-target-view]');
@@ -113,6 +141,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
+  });
+
+  const sidebar = document.getElementById('managerSidebar');
+  const sidebarOverlay = document.getElementById('managerSidebarOverlay');
+  const sidebarToggle = document.getElementById('managerSidebarToggle');
+  const closeSidebar = () => {
+    sidebar?.classList.remove('open');
+    sidebarOverlay?.classList.remove('open');
+    sidebarToggle?.setAttribute('aria-expanded', 'false');
+  };
+  sidebarToggle?.addEventListener('click', () => {
+    const open = sidebar?.classList.toggle('open');
+    sidebarOverlay?.classList.toggle('open', open);
+    sidebarToggle.setAttribute('aria-expanded', String(Boolean(open)));
+  });
+  document.getElementById('managerSidebarClose')?.addEventListener('click', closeSidebar);
+  sidebarOverlay?.addEventListener('click', closeSidebar);
+  document.getElementById('btnProfileWorkspace')?.addEventListener('click', () => {
+    const session = window.SmartShiftAuth?.getSession();
+    switchView(session?.role || 'login');
+  });
+  document.getElementById('btnLogout')?.addEventListener('click', () => {
+    window.SmartShiftAuth?.clearSession();
+    window.localStorage.removeItem('smartshift-token');
+    showToast('You have been logged out safely.', 'success');
+    switchView('login');
   });
 
   // Authentication mode, role selection, login and signup.
@@ -198,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
           user = localAuthentication();
         }
         window.SmartShiftAuth.setSession(user);
+        updateAuthNav();
         if (selectedRole === 'employee' && !window.mockDatabase.workers.some(worker => worker.id === user.id)) {
           window.mockDatabase.workers.push({ id: user.id, name: user.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
           window.persistMockDatabase?.();
@@ -210,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const offlineUser = networkError ? localAuthentication() : null;
           if (!offlineUser) throw error;
           window.SmartShiftAuth.setSession(offlineUser);
+          updateAuthNav();
           if (selectedRole === 'employee' && !window.mockDatabase.workers.some(worker => worker.id === offlineUser.id)) {
             window.mockDatabase.workers.push({ id: offlineUser.id, name: offlineUser.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
             window.persistMockDatabase?.();

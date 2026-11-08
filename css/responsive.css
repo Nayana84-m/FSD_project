@@ -83,6 +83,10 @@
   .roster-grid-container { grid-template-columns: 1fr; }
   .leave-request-form { grid-template-columns: 1fr 1fr; }
   .leave-request-form button { grid-column: 1 / -1; }
+  .profile-page { padding: 6rem 1rem 3rem; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .profile-hero { align-items: flex-start; padding: 1.25rem; }
+  .manager-menu-toggle { order: -1; }
 
   /* Hero Section */
   .hero { 

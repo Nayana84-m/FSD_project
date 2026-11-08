@@ -113,6 +113,7 @@
 
       <div class="nav-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLogin">Login</button>
+        <button class="btn btn-ghost spa-nav-link" data-target-view="profile" id="btnProfile" hidden>Profile</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStarted">Staff Portal</button>
         <button class="btn btn-outline spa-nav-link" data-target-view="manager">Manager Admin</button>
       </div>
@@ -493,15 +494,10 @@
     <div class="manager-toolbar">
       <div class="container">
         <div class="toolbar-flex">
+          <button id="managerSidebarToggle" class="manager-menu-toggle" type="button" aria-controls="managerSidebar" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open roster filters</span></button>
           <div>
             <h2 style="font-size:1.5rem; font-weight:800;">Downtown Cafe - Weekly Schedule</h2>
             <p style="font-size:0.85rem; color:var(--text-secondary);"><span id="managerBusinessName">Downtown Cafe</span> &bull; Smart Conflict Prevention Active 🛡️</p>
-          </div>
-          <div class="filter-pills">
-            <button class="filter-pill active" data-filter="all" aria-pressed="true">All Roles</button>
-            <button class="filter-pill" data-filter="Barista">Baristas</button>
-            <button class="filter-pill" data-filter="Cashier">Cashiers</button>
-            <button class="filter-pill" data-filter="Food Safety">Kitchen/Prep</button>
           </div>
           <div class="manager-actions">
             <button id="btnOpenStaffForm" class="btn btn-outline">+ Add staff</button>
@@ -510,6 +506,17 @@
         </div>
       </div>
     </div>
+    <aside id="managerSidebar" class="manager-sidebar" aria-label="Roster filters">
+      <div class="manager-sidebar-header"><div><span class="section-tag">Navigate roster</span><h3>Shift views</h3></div><button id="managerSidebarClose" class="modal-close-btn" type="button" aria-label="Close roster filters">&times;</button></div>
+      <p>Choose a role to jump directly to matching shifts.</p>
+      <div class="filter-pills">
+        <button class="filter-pill active" data-filter="all" aria-pressed="true">All Roles</button>
+        <button class="filter-pill" data-filter="Barista" aria-pressed="false">Baristas</button>
+        <button class="filter-pill" data-filter="Cashier" aria-pressed="false">Cashiers</button>
+        <button class="filter-pill" data-filter="Food Safety" aria-pressed="false">Kitchen/Prep</button>
+      </div>
+    </aside>
+    <div id="managerSidebarOverlay" class="manager-sidebar-overlay"></div>
 
     <!-- Main Management View -->
     <main class="container" style="padding-bottom: 4rem;">
@@ -539,8 +546,8 @@
       </div>
 
       <section class="manager-setup-grid" aria-label="Team setup">
-        <div class="setup-card" id="staffDirectoryCard">
-          <div class="setup-card-heading"><div><span class="section-tag">Your team</span><h3>Staff directory</h3></div><span id="staffCountBadge" class="badge badge-info">0 people</span></div>
+        <div class="setup-card staff-directory-card is-collapsed" id="staffDirectoryCard">
+          <div class="setup-card-heading"><div><span class="section-tag">Your team</span><h3>Staff directory</h3></div><div class="setup-card-heading-actions"><span id="staffCountBadge" class="badge badge-info">0 people</span><button id="btnToggleStaffDirectory" class="btn btn-ghost btn-sm" type="button" aria-expanded="false">Show team</button></div></div>
           <div id="staffDirectory" class="staff-directory"></div>
         </div>
         <div class="setup-card" id="shiftFormCard" hidden>
@@ -602,6 +609,19 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ======================================================
+       VIEW 5: PROFILE
+       ====================================================== -->
+  <div id="view-profile" class="app-view">
+    <main class="profile-page container">
+      <div class="profile-hero"><span class="profile-avatar" id="profileAvatar">👤</span><div><span class="section-tag">Your account</span><h1 id="profileName">Profile</h1><p id="profileSubtitle">Manage your SmartShift account details.</p></div></div>
+      <div class="profile-grid">
+        <section class="profile-card"><span class="section-tag">Account details</span><div class="profile-detail"><span>Name</span><strong id="profileDetailName">—</strong></div><div class="profile-detail"><span>Email</span><strong id="profileDetailEmail">—</strong></div><div class="profile-detail"><span>Role</span><strong id="profileDetailRole">—</strong></div></section>
+        <section class="profile-card"><span class="section-tag">Workspace access</span><h3 id="profileWorkspaceTitle">Your workspace</h3><p id="profileWorkspaceText">You can access your assigned SmartShift tools from here.</p><button id="btnProfileWorkspace" class="btn btn-primary">Open workspace</button><button id="btnLogout" class="btn btn-outline">Log out</button></section>
+      </div>
+    </main>
   </div>
 
 

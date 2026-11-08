@@ -123,6 +123,10 @@ function initFilterPills() {
         p.setAttribute("aria-pressed", String(isActive));
       });
       initRosterGrid();
+      document.getElementById('managerSidebar')?.classList.remove('open');
+      document.getElementById('managerSidebarOverlay')?.classList.remove('open');
+      document.getElementById('managerSidebarToggle')?.setAttribute('aria-expanded', 'false');
+      document.getElementById('managerRosterGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 }
@@ -300,6 +304,11 @@ function initManagerSetup() {
   document.getElementById('btnCloseShiftForm')?.addEventListener('click', () => toggle(shiftCard, false));
   document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => toggle(staffCard, true));
   document.getElementById('btnCloseStaffForm')?.addEventListener('click', () => toggle(staffCard, false));
+  document.getElementById('btnToggleStaffDirectory')?.addEventListener('click', event => {
+    const open = staffCard.classList.toggle('is-collapsed') === false;
+    event.currentTarget.textContent = open ? 'Hide team' : 'Show team';
+    event.currentTarget.setAttribute('aria-expanded', String(open));
+  });
 
   document.getElementById('createShiftForm')?.addEventListener('submit', event => {
     event.preventDefault();
