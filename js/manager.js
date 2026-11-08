@@ -150,11 +150,16 @@ function initAssignModal() {
       const selectedWorkerId = workerSelect.value;
 
       activeShiftToAssign.assignedWorkerId = selectedWorkerId;
+      const assignedDay = activeShiftToAssign.dayName;
+      const assignedWorker = window.mockDatabase.workers.find(worker => worker.id === selectedWorkerId);
+      if (assignedWorker) assignedWorker.currentAssignedHours += activeShiftToAssign.duration;
+      if (window.persistMockDatabase) window.persistMockDatabase();
+      if (window.SmartShiftAPI) window.SmartShiftAPI.assignShift(activeShiftToAssign.id, selectedWorkerId);
 
       closeModal();
       initRosterGrid();
       if (window.showToast) {
-        window.showToast(`Yay! Shift successfully assigned to ${activeShiftToAssign.dayName}! 🎉`, "success");
+        window.showToast(`Yay! Shift successfully assigned to ${assignedDay}! 🎉`, "success");
       }
     });
   }
