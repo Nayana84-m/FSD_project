@@ -1,0 +1,13 @@
+{
+  "name": "smartshift",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Smart workforce scheduling platform with a responsive SPA and REST API.",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test tests/server.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
