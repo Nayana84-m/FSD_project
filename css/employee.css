@@ -60,6 +60,20 @@
   margin-bottom: 2.5rem;
 }
 
+.upcoming-shifts-card { background: linear-gradient(135deg, #eff6ff, #ecfdf5); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.4rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+.upcoming-shifts-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
+.upcoming-shifts-heading h3 { font-size: 1.2rem; margin: 0.2rem 0; }
+.upcoming-shifts-heading p { color: var(--text-secondary); font-size: 0.82rem; }
+.roster-status { display: inline-flex; align-items: center; border-radius: var(--radius-pill); padding: 0.3rem 0.65rem; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+.roster-status.draft { background: var(--warning-bg); color: #92400e; }
+.roster-status.published { background: var(--success-bg); color: #047857; }
+.upcoming-shifts-list { display: grid; gap: 0.65rem; }
+.upcoming-shift-row { display: grid; grid-template-columns: 90px 1fr auto; gap: 0.85rem; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.82); border: 1px solid rgba(255,255,255,0.9); border-radius: 12px; }
+.upcoming-shift-day { font-weight: 800; color: var(--primary); }
+.upcoming-shift-info { display: grid; gap: 0.1rem; font-size: 0.82rem; }
+.upcoming-shift-info span { color: var(--text-secondary); font-size: 0.74rem; }
+.upcoming-shift-pay { text-align: right; font-weight: 800; color: var(--text-main); }
+
 .employee-secondary-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
 .leave-card { margin-bottom: 2rem; }
 .leave-balance { display: grid; text-align: right; }

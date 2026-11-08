@@ -6,6 +6,8 @@
 
 const mockDatabase = {
   leaveRequests: [],
+  rosterStatus: "draft",
+  publishedAt: null,
   // Workers / Part-Time Employees Collection
   workers: [
     {

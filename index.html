@@ -431,6 +431,10 @@
 
     <!-- Main Content -->
     <main class="container" style="padding-bottom: 4rem;">
+      <section class="upcoming-shifts-card">
+        <div class="upcoming-shifts-heading"><div><span class="section-tag">Your schedule</span><h3>Upcoming shifts</h3><p id="employeeRosterMessage">Your published shifts will appear here.</p></div><span id="employeeRosterStatus" class="roster-status draft">Draft</span></div>
+        <div id="employeeUpcomingShifts" class="upcoming-shifts-list"></div>
+      </section>
       <div class="availability-container">
         <div class="grid-header-row">
           <div>
@@ -497,7 +501,7 @@
           <button id="managerSidebarToggle" class="manager-menu-toggle" type="button" aria-controls="managerSidebar" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open roster filters</span></button>
           <div>
             <h2 style="font-size:1.5rem; font-weight:800;">Downtown Cafe - Weekly Schedule</h2>
-            <p style="font-size:0.85rem; color:var(--text-secondary);"><span id="managerBusinessName">Downtown Cafe</span> &bull; Smart Conflict Prevention Active 🛡️</p>
+            <p style="font-size:0.85rem; color:var(--text-secondary);"><span id="managerBusinessName">Downtown Cafe</span> &bull; Smart Conflict Prevention Active 🛡️ <span id="managerRosterStatus" class="roster-status draft">Draft roster</span></p>
           </div>
           <div class="manager-actions">
             <button id="btnOpenStaffForm" class="btn btn-outline">+ Add staff</button>

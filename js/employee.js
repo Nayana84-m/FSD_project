@@ -55,6 +55,22 @@ function renderEmployeeSummary() {
   if (pay) pay.textContent = ((worker.currentAssignedHours || 0) * (worker.hourlyRate || 0)).toLocaleString('en-IN');
   if (leaveBalance) leaveBalance.textContent = worker.leaveBalance ?? 12;
   renderLeaveRequests(worker);
+  renderUpcomingShifts(worker);
+}
+
+function renderUpcomingShifts(worker) {
+  const list = document.getElementById('employeeUpcomingShifts');
+  const status = document.getElementById('employeeRosterStatus');
+  const message = document.getElementById('employeeRosterMessage');
+  if (!list) return;
+  const published = window.mockDatabase.rosterStatus === 'published';
+  if (status) {
+    status.textContent = published ? 'Published' : 'Draft';
+    status.className = `roster-status ${published ? 'published' : 'draft'}`;
+  }
+  const shifts = published ? window.mockDatabase.shifts.filter(shift => shift.assignedWorkerId === worker.id) : [];
+  if (message) message.textContent = published ? 'Here are the shifts your manager has confirmed for you.' : 'Your manager has not published this roster yet.';
+  list.innerHTML = shifts.length ? shifts.map(shift => `<div class="upcoming-shift-row"><strong class="upcoming-shift-day">${shift.dayName}</strong><div class="upcoming-shift-info"><strong>${shift.timeLabel}</strong><span>${shift.department} · ${shift.requiredRole} · ${shift.duration} hours</span></div><strong class="upcoming-shift-pay">Rs. ${(shift.duration * (worker.hourlyRate || 0)).toLocaleString('en-IN')}</strong></div>`).join('') : '<p class="empty-state">No confirmed shifts to show yet.</p>';
 }
 
 function renderLeaveRequests(worker) {

@@ -264,8 +264,25 @@ function renderValidationFeedbackInModal(result, container, confirmBtn) {
 function initPublishButton() {
   const publishBtn = document.getElementById("btnPublishRoster");
   if (!publishBtn) return;
+  const currentStatus = document.getElementById('managerRosterStatus');
+  if (window.mockDatabase.rosterStatus === 'published') {
+    if (currentStatus) { currentStatus.textContent = 'Published roster'; currentStatus.className = 'roster-status published'; }
+    const label = publishBtn.querySelector('span');
+    if (label) label.textContent = '✓ Roster Published';
+  }
 
+  if (publishBtn.dataset.bound === 'true') return;
+  publishBtn.dataset.bound = 'true';
   publishBtn.addEventListener("click", () => {
+    window.mockDatabase.rosterStatus = 'published';
+    window.mockDatabase.publishedAt = new Date().toISOString();
+    window.persistMockDatabase?.();
+    const status = document.getElementById('managerRosterStatus');
+    if (status) {
+      status.textContent = 'Published roster';
+      status.className = 'roster-status published';
+    }
+    publishBtn.querySelector('span').textContent = '✓ Roster Published';
     if (window.showToast) {
       window.showToast("🚀 Roster Published! All staff have been notified.", "success");
     }

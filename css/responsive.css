@@ -83,6 +83,8 @@
   .roster-grid-container { grid-template-columns: 1fr; }
   .leave-request-form { grid-template-columns: 1fr 1fr; }
   .leave-request-form button { grid-column: 1 / -1; }
+  .upcoming-shift-row { grid-template-columns: 1fr auto; }
+  .upcoming-shift-info { grid-column: 1 / -1; grid-row: 2; }
   .profile-page { padding: 6rem 1rem 3rem; }
   .profile-grid { grid-template-columns: 1fr; }
   .profile-hero { align-items: flex-start; padding: 1.25rem; }
