@@ -61,10 +61,27 @@ async function handle(request, response) {
     return sendJson(response, 200, { data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } } });
   }
 
+  if (request.method === "POST" && url.pathname === "/api/auth/signup") {
+    const body = await readBody(request);
+    if (!body.name || !body.email || !body.password || !["employee", "manager"].includes(body.role)) return sendJson(response, 400, { error: "Name, email, password, and role are required." });
+    if (body.password.length < 8) return sendJson(response, 400, { error: "Password must be at least 8 characters." });
+    if (db.users.some(item => item.email.toLowerCase() === body.email.toLowerCase())) return sendJson(response, 409, { error: "An account with this email already exists." });
+    const user = { id: `${body.role}-${crypto.randomUUID()}`, name: body.name.trim(), email: body.email.trim().toLowerCase(), role: body.role, password: body.password };
+    db.users.push(user);
+    if (body.role === "employee") db.workers.push({ id: user.id, name: user.name, role: "Staff member", certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
+    db.auditLog.push({ action: "user.created", userId: user.id, role: user.role, at: new Date().toISOString() });
+    writeDb(db);
+    const token = crypto.randomBytes(24).toString("hex");
+    sessions.set(token, { userId: user.id, role: user.role, expiresAt: Date.now() + 8 * 60 * 60 * 1000 });
+    return sendJson(response, 201, { data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } } });
+  }
+
   const auth = request.headers.authorization?.replace("Bearer ", "");
   if (!auth || !sessions.has(auth) || sessions.get(auth).expiresAt < Date.now()) return sendJson(response, 401, { error: "Authentication required." });
+  const session = sessions.get(auth);
 
   if (request.method === "PUT" && parts[0] === "api" && parts[1] === "workers" && parts[3] === "availability") {
+    if (session.role !== "employee" || session.userId !== parts[2]) return sendJson(response, 403, { error: "Only the matching staff member can update availability." });
     const worker = db.workers.find(item => item.id === parts[2]);
     if (!worker) return sendJson(response, 404, { error: "Worker not found." });
     const body = await readBody(request);
@@ -75,6 +92,7 @@ async function handle(request, response) {
   }
 
   if (request.method === "POST" && parts[0] === "api" && parts[1] === "shifts" && parts[3] === "assign") {
+    if (session.role !== "manager") return sendJson(response, 403, { error: "Only managers can assign shifts." });
     const shift = db.shifts.find(item => item.id === parts[2]);
     const body = await readBody(request);
     const worker = db.workers.find(item => item.id === body.workerId);
