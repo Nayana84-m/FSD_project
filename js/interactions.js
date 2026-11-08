@@ -102,6 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bind Login Form submission inside SPA
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
+    const roleSelect = document.getElementById('loginRoleSelect');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    if (roleSelect && emailInput && passwordInput) {
+      roleSelect.addEventListener('change', () => {
+        const managerMode = roleSelect.value === 'manager';
+        emailInput.value = managerMode ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
+        passwordInput.value = managerMode ? 'manager123' : 'employee123';
+      });
+    }
+
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const roleSelect = document.getElementById('loginRoleSelect');
