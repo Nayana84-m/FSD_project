@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SmartShift helps small teams collect availability and publish conflict-free weekly rosters." />
+  <meta name="theme-color" content="#059669" />
   <title>SmartShift | Smart Worksite Roster & Shift Manager</title>
 
   <!-- Google Fonts -->
@@ -103,7 +105,7 @@
   </header>
 
   <!-- Quick SPA View Switcher Toolbar -->
-  <div class="view-switcher-bar">
+  <div class="view-switcher-bar" aria-label="Application preview navigation">
     <span style="font-weight: 700; color: #475569;">Quick View Switcher:</span>
     <button class="view-btn-pill spa-nav-link active" data-target-view="landing">🏡 Landing Page</button>
     <button class="view-btn-pill spa-nav-link" data-target-view="login">🔑 Login</button>
@@ -550,10 +552,11 @@
   </footer>
 
   <!-- Toast notification -->
-  <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <!-- Application Scripts -->
   <script src="js/mockData.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/validation.js"></script>
   <script src="js/employee.js"></script>
   <script src="js/manager.js"></script>
