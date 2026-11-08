@@ -102,13 +102,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bind Login Form submission inside SPA
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const roleSelect = document.getElementById('loginRoleSelect');
       const targetRole = roleSelect ? roleSelect.value : 'employee';
       
-      showToast(`Welcome back! Logged in as ${targetRole === 'manager' ? 'Manager' : 'Employee'}. 🎉`, 3000);
-      switchView(targetRole);
+      const email = document.getElementById('email')?.value.trim();
+      const password = document.getElementById('password')?.value;
+      const submitButton = loginForm.querySelector('button[type="submit"]');
+      if (submitButton) submitButton.disabled = true;
+      try {
+        if (window.SmartShiftAPI) await window.SmartShiftAPI.login({ email, password, role: targetRole });
+        showToast(`Welcome back! Logged in as ${targetRole === 'manager' ? 'Manager' : 'Employee'}. 🎉`, 'success');
+        switchView(targetRole);
+      } catch (error) {
+        if (password !== (targetRole === 'manager' ? 'manager123' : 'employee123')) {
+          showToast('Please check your demo password and try again.', 'danger');
+          return;
+        }
+        showToast('Demo mode enabled. Start the API when you are ready to test persistence.', 'info');
+        switchView(targetRole);
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
     });
   }
 });
