@@ -68,13 +68,15 @@ function switchView(targetView, scrollToSectionId = null) {
 window.switchView = switchView;
 
 // Global Toast Notification Helper
-function showToast(msg, duration = 3000) {
+function showToast(msg, type = 'info', duration = 6000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toastEl = document.createElement('div');
   toastEl.className = 'toast';
   toastEl.textContent = msg;
-  toastEl.setAttribute('role', 'status');
+  toastEl.setAttribute('role', type === 'danger' ? 'alert' : 'status');
+  if (type === 'danger') toastEl.style.background = '#991b1b';
+  if (type === 'success') toastEl.style.background = '#065f46';
   container.appendChild(toastEl);
   requestAnimationFrame(() => toastEl.classList.add('show'));
   setTimeout(() => {
@@ -119,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const fullNameInput = document.getElementById('fullName');
     const authHelper = document.getElementById('authHelper');
+    const authFeedback = document.getElementById('authFeedback');
     const authSubmit = loginForm.querySelector('.auth-submit');
     let selectedRole = 'employee';
     let authMode = 'login';
@@ -148,6 +151,24 @@ document.addEventListener('DOMContentLoaded', () => {
         emailInput.value = '';
         passwordInput.value = '';
       }
+      authFeedback.hidden = true;
+      authFeedback.textContent = '';
+    };
+
+    const localAuthentication = () => {
+      const localUsers = JSON.parse(localStorage.getItem('smartshift-users') || '[]');
+      if (authMode === 'signup') {
+        if (localUsers.some(item => item.email.toLowerCase() === emailInput.value.toLowerCase())) throw new Error('An account with this email already exists.');
+        const user = { id: `local-${Date.now()}`, name: fullNameInput.value.trim(), email: emailInput.value.trim().toLowerCase(), role: selectedRole };
+        localUsers.push({ ...user, password: passwordInput.value });
+        localStorage.setItem('smartshift-users', JSON.stringify(localUsers));
+        return user;
+      }
+      const user = localUsers.find(item => item.email === emailInput.value && item.password === passwordInput.value && item.role === selectedRole);
+      const isDemo = (emailInput.value === 'manager@smartshift.local' && passwordInput.value === 'manager123' && selectedRole === 'manager') || (emailInput.value === 'alex.rivera@smartshift.com' && passwordInput.value === 'employee123' && selectedRole === 'employee');
+      if (user) return user;
+      if (isDemo) return { id: selectedRole === 'manager' ? 'manager-1' : 'emp1', name: selectedRole === 'manager' ? 'Maya Chen' : 'Alex Rivera', email: emailInput.value, role: selectedRole };
+      throw new Error('Invalid email, password, or selected role.');
     };
 
     document.querySelectorAll('.auth-role-card').forEach(card => card.addEventListener('click', () => {
@@ -173,23 +194,24 @@ document.addEventListener('DOMContentLoaded', () => {
             ? await window.SmartShiftAPI.signup({ name: fullNameInput.value.trim(), email, password, role: selectedRole })
             : await window.SmartShiftAPI.login({ email, password, role: selectedRole });
         } else {
-          const localUsers = JSON.parse(localStorage.getItem('smartshift-users') || '[]');
-          if (authMode === 'signup') {
-            if (localUsers.some(item => item.email === email)) throw new Error('An account with this email already exists.');
-            user = { id: `local-${Date.now()}`, name: fullNameInput.value.trim(), email, role: selectedRole };
-            localUsers.push({ ...user, password });
-            localStorage.setItem('smartshift-users', JSON.stringify(localUsers));
-          } else {
-            user = localUsers.find(item => item.email === email && item.password === password && item.role === selectedRole);
-            if (!user && ((email === 'manager@smartshift.local' && password === 'manager123' && selectedRole === 'manager') || (email === 'alex.rivera@smartshift.com' && password === 'employee123' && selectedRole === 'employee'))) user = { name: selectedRole === 'manager' ? 'Maya Chen' : 'Alex Rivera', email, role: selectedRole };
-            if (!user) throw new Error('Invalid email, password, or role.');
-          }
+          user = localAuthentication();
         }
         window.SmartShiftAuth.setSession(user);
         showToast(`${authMode === 'signup' ? 'Account created' : 'Welcome back'}! Opening your ${selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`, 'success');
         switchView(selectedRole);
       } catch (error) {
-        showToast(error.message || 'Unable to complete authentication.', 'danger');
+        const networkError = error instanceof TypeError || /fetch|network|failed to fetch/i.test(error.message || '');
+        try {
+          const offlineUser = networkError ? localAuthentication() : null;
+          if (!offlineUser) throw error;
+          window.SmartShiftAuth.setSession(offlineUser);
+          showToast('API is offline. Local demo mode is enabled and this account is saved in your browser.', 'info', 9000);
+          switchView(selectedRole);
+        } catch (fallbackError) {
+          authFeedback.textContent = fallbackError.message || 'Unable to complete authentication.';
+          authFeedback.hidden = false;
+          showToast(authFeedback.textContent, 'danger', 9000);
+        }
       } finally {
         if (submitButton) submitButton.disabled = false;
       }

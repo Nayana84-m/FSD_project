@@ -68,6 +68,7 @@
     .logo-section { text-align: center; margin-bottom: 1.5rem; }
     .logo { font: 800 1.65rem var(--font-display); color: var(--text-main); }
     .tagline, .auth-helper { color: var(--text-secondary); font-size: 0.9rem; }
+    .auth-feedback { padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--danger-bg); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; font-weight: 600; }
     .auth-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
     .auth-role-card { display: flex; align-items: center; gap: 0.7rem; text-align: left; padding: 0.85rem; background: #fff; border: 1px solid var(--border); border-radius: 14px; color: var(--text-main); }
     .auth-role-card.active { border-color: var(--primary); background: var(--primary-bg); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12); }
@@ -370,6 +371,7 @@
 
         <form id="loginForm" class="auth-form">
           <p class="auth-helper" id="authHelper">Welcome back. Log in to continue to your staff workspace.</p>
+          <div id="authFeedback" class="auth-feedback" role="alert" hidden></div>
           <div class="form-group">
             <label for="email">Work email</label>
             <input type="email" id="email" placeholder="you@company.com" value="alex.rivera@smartshift.com" autocomplete="email" required>
