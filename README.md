@@ -20,7 +20,7 @@
 
 **SmartShift** is a workforce scheduling platform built to replace manual, spreadsheet-based rostering. Store managers and café teams get conflict-free, automated weekly schedules — backed by a lightweight client-side validation engine that catches problems before a shift is ever confirmed.
 
-Built entirely using **HTML5, CSS3, and JavaScript**, Phase 1 demonstrates responsive design, clean modular components, and polished micro-animations — no frameworks, no backend, yet.
+Built with a responsive vanilla JavaScript SPA and a dependency-free Node.js REST API. The browser still supports a file-based demo mode, while the API adds authenticated persistence for local end-to-end testing.
 
 <br>
 
@@ -51,7 +51,7 @@ flowchart LR
     C3 -- ❌ --> X
 ```
 
-> **Phase 1:** these checks are visually demonstrated on the landing page. Live backend validation ships in Phase 2.
+> The same rules are demonstrated in the UI and enforced again by the API before assignments are written.
 
 <br>
 
@@ -68,16 +68,13 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph P1["Phase 1 — shipped"]
-        H[HTML5] --- Csx[CSS3] --- J[Vanilla JS ES6+]
-    end
-    subgraph P2["Phase 2 — planned"]
-        R[React.js] --- N[Node.js] --- E[Express.js] --- M[(MongoDB)] --- JWT[JWT Auth]
-    end
-    P1 --> P2
+    H[HTML5] --- Csx[CSS3] --- J[Vanilla JS ES6+]
+    J --> A[Node.js REST API]
+    A --> D[(JSON database)]
+    A --> S[Token sessions]
 ```
 
-No external frameworks, libraries, or backends are used in Phase 1.
+The API uses Node's built-in modules, so no dependency installation is required.
 
 <br>
 
@@ -87,7 +84,20 @@ No external frameworks, libraries, or backends are used in Phase 1.
 git clone https://github.com/Nayana84-m/FSD_project.git
 ```
 
-Open `index.html` — it launches instantly in any browser.
+Open `index.html` for offline demo mode, or run the API for the full local flow:
+
+```bash
+npm start
+# then open http://localhost:3000/../index.html with Live Server,
+# or open index.html directly and use the demo fallback.
+```
+
+Demo accounts:
+
+- Manager: `manager@smartshift.local` / `manager123`
+- Employee: `alex.rivera@smartshift.com` / `employee123`
+
+Run automated checks with `npm test`.
 
 <br>
 
@@ -98,6 +108,9 @@ FSD_project/
 ├── assets/
 ├── css/
 ├── js/
+├── server/             # REST API, data access, and local database
+├── tests/              # API contract and business-rule tests
+├── package.json
 ├── .gitignore
 ├── HOW_TO_RUN.txt
 ├── LICENSE
@@ -107,13 +120,13 @@ FSD_project/
 
 <br>
 
-## 🔮 Future Scope
+## ✅ Faculty Rubric Coverage
 
-- React.js frontend with Employee and Manager dashboards
-- Node.js + Express.js REST API backend
-- MongoDB for persistent storage of users, shifts, and availability
-- JWT Authentication for secure multi-role login
-- Live backend validation for all 3 smart checks
+- **Frontend & responsiveness:** responsive landing page, employee timetable, manager roster, keyboard support, focus states, and mobile layout.
+- **Backend & APIs:** health, login, workers, shifts, availability update, and assignment endpoints with validation and consistent JSON responses.
+- **Database integration:** structured users, workers, shifts, and audit log persisted in `server/data/db.json`.
+- **Authentication & security:** role-aware login, expiring bearer sessions, input validation, CORS control, and security response headers.
+- **Verification:** automated tests cover the health contract, login contract, and certification policy.
 
 <br>
 
