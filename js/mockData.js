@@ -134,4 +134,29 @@ const mockDatabase = {
   ]
 };
 
+// Keep the prototype usable without a server while preserving user changes
+// between page refreshes. The API adapter can replace this data when the
+// Node service is running locally.
+const STORAGE_KEY = "smartshift-demo-data-v1";
+try {
+  const savedData = window.localStorage.getItem(STORAGE_KEY);
+  if (savedData) {
+    const parsedData = JSON.parse(savedData);
+    if (Array.isArray(parsedData.workers) && Array.isArray(parsedData.shifts)) {
+      mockDatabase.workers = parsedData.workers;
+      mockDatabase.shifts = parsedData.shifts;
+    }
+  }
+} catch (error) {
+  console.warn("SmartShift could not restore local demo data.", error);
+}
+
+window.persistMockDatabase = function persistMockDatabase() {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockDatabase));
+  } catch (error) {
+    console.warn("SmartShift could not save local demo data.", error);
+  }
+};
+
 window.mockDatabase = mockDatabase;

@@ -16,7 +16,8 @@ function showToast(message, type = "success") {
   toast.className = `toast`;
   
   const icon = type === "success" ? "🎉" : type === "danger" ? "🚫" : "ℹ️";
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  toast.setAttribute("role", type === "danger" ? "alert" : "status");
+  toast.innerHTML = `<span aria-hidden="true">${icon}</span> <span>${message}</span>`;
   
   if (type === "danger") {
     toast.style.background = "#991b1b";
