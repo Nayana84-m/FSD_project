@@ -29,6 +29,14 @@ test("signup, workspace isolation, assignment, and staff-only roster access work
   });
 
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  const appPage = await fetch(`${baseUrl}/`);
+  assert.equal(appPage.status, 200);
+  assert.match(await appPage.text(), /SmartShift/);
+  for (const privatePath of ["/.env", "/.env.example", "/server/data/db.json", "/README.md", "/package.json"]) {
+    assert.equal((await fetch(`${baseUrl}${privatePath}`)).status, 404, `${privatePath} must not be publicly served`);
+  }
+  assert.equal((await fetch(`${baseUrl}/js/api.js`)).status, 200);
+
   async function api(route, { token, method = "GET", body } = {}) {
     const response = await fetch(`${baseUrl}${route}`, {
       method,

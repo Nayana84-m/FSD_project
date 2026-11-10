@@ -1,23 +1,14 @@
-<div align="center">
-  <img src="assets/readme-banner.svg" alt="SmartShift — kinder, clearer staff scheduling" width="100%" />
-  <br />
-  <strong>Small teams, smoother shifts.</strong>
-  <br />
-  A role based workforce scheduling app for cafes, restaurants, and friendly neighborhood teams.
-  <br /><br />
-  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-18%2B-43853D?style=flat-square&logo=node.js&logoColor=white" />
-  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white" />
-  <img alt="Vanilla JavaScript" src="https://img.shields.io/badge/Frontend-Vanilla%20JS-F7DF1E?style=flat-square&logo=javascript&logoColor=222" />
-  <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-8B7CF6?style=flat-square" />
-</div>
+# SmartShift
 
-<br />
+**Staff scheduling for cafes and small teams.** Build rosters around skills, availability, weekly hour limits, and leave requests.
+
+![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853D?style=flat-square&logo=node.js&logoColor=white) ![MongoDB Atlas](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white) ![Vanilla JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=222) ![MIT License](https://img.shields.io/badge/License-MIT-8B7CF6?style=flat-square)
 
 ## 🌷 Is SmartShift ready?
 
-**The core app is ready to run locally:** managers can create a cafe, invite staff, build and publish a roster, and review leave requests. Staff can join their cafe, set availability, request leave, and see their own assigned shifts. Sign in and data are handled by the app’s API, with MongoDB Atlas or local JSON storage.
+**The core app is ready for a hosted student/demo deployment** once the hosting environment has its MongoDB Atlas settings and production mode configured. Managers can create a cafe, invite staff, build and publish a roster, and review leave requests. Staff can join their cafe, set availability, request leave, and see their own assigned shifts.
 
-**Deployment is the next step.** This repository is set up for local use and Atlas connection; a hosting service still needs to be configured after the local workflow is confirmed.
+It is a prototype, not yet hardened for handling real employee records at business scale. Read [Before a public launch](#before-a-public-launch) before sharing a public URL.
 
 ## ☕ The problem it solves
 
@@ -130,6 +121,9 @@ The automated checks cover role-based sign-in, cafe workspace separation, staff-
 - Use a strong, unique Atlas database password and restrict Atlas network access to the hosting provider where possible.
 - Pick a hosting/database plan that fits your expected usage; free plan limits can change.
 - The current refresh is periodic (about four seconds), rather than push-based live updates.
+- Login sessions live in the running server’s memory, so a restart signs everyone out; this setup is intended for one app instance.
+- The app stores its state in one MongoDB document. It is suitable for a class demo, not high-concurrency business use.
+- Add login rate limiting and a persistent session store before treating this as a production service.
 - This is a student project prototype. Review production hosting, privacy, backups, and operational needs before using it for real employee records.
 
 ## 🌼 Configuration
@@ -140,6 +134,10 @@ The automated checks cover role-based sign-in, cafe workspace separation, staff-
 | `MONGODB_DB_NAME` | Atlas database name; defaults to `smartshift` |
 | `MONGODB_DNS_SERVERS` | DNS resolver used for Atlas lookup; defaults to `8.8.8.8` |
 | `PORT` | Server port; defaults to `3000` |
+| `NODE_ENV` | Set to `production` on your hosting provider |
+| `CLIENT_ORIGIN` | Optional allowed origin when the frontend is hosted separately |
+
+For a hosted demo, set `NODE_ENV=production` and provide `MONGODB_URI` and `MONGODB_DB_NAME` as private environment settings. Never commit `.env` or publish database credentials.
 
 ## 📜 License
 

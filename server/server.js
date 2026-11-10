@@ -13,9 +13,12 @@ const contentTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; c
 function serveApp(request, response, pathname) {
   const requestedPath = pathname === "/" ? "/index.html" : decodeURIComponent(pathname);
   const filePath = path.resolve(projectRoot, `.${requestedPath}`);
-  if (!filePath.startsWith(`${projectRoot}${path.sep}`)) {
-    response.writeHead(403);
-    return response.end("Forbidden");
+  const relativePath = path.relative(projectRoot, filePath);
+  const pathParts = relativePath.split(path.sep);
+  const publicAsset = ["assets", "css", "js"].includes(pathParts[0]) && pathParts.every(part => part && !part.startsWith("."));
+  if (relativePath !== "index.html" && !publicAsset) {
+    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" });
+    return response.end("Not found");
   }
   fs.readFile(filePath, (error, contents) => {
     if (error) {
@@ -32,14 +35,15 @@ function serveApp(request, response, pathname) {
 }
 
 function sendJson(response, status, payload) {
-  response.writeHead(status, {
+  const headers = {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": process.env.CLIENT_ORIGIN || "*",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY"
-  });
+  };
+  if (process.env.CLIENT_ORIGIN) headers["Access-Control-Allow-Origin"] = process.env.CLIENT_ORIGIN;
+  response.writeHead(status, headers);
   response.end(JSON.stringify(payload));
 }
 
@@ -392,7 +396,13 @@ const server = http.createServer((request, response) => {
 });
 
 if (require.main === module) {
-  connectDatabase()
+  Promise.resolve()
+    .then(() => {
+      if (process.env.NODE_ENV === "production" && !process.env.MONGODB_URI?.trim()) {
+        throw new Error("MONGODB_URI is required in production so hosted data is stored persistently.");
+      }
+      return connectDatabase();
+    })
     .then(() => server.listen(port, () => console.log(`SmartShift API running at http://localhost:${port}`)))
     .catch(error => {
       console.error(`Database connection failed: ${error.message}`);
