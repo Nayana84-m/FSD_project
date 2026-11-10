@@ -1,63 +1,61 @@
-# ==============================================================================
-# SmartShift: Worksite Roster & Team Scheduling Platform
-# Quick Start & Evaluation Guide
-# ==============================================================================
+SMARTSHIFT LOCAL RUN GUIDE
+=========================
 
-Hello Evaluator! 
+Requirements
+------------
+- Node.js 18 or later
+- npm
+- MongoDB Atlas account for cloud database mode (optional for local demo mode)
 
-Welcome to SmartShift — a smart, stress-free employee scheduling web portal
-inspired by 7shifts.
+Install and configure
+---------------------
+1. Open PowerShell in the SmartShift project folder.
+2. Install the project packages:
+       npm install
+3. If the project does not already have a .env file, create one:
+       Copy-Item .env.example .env
+4. Add your Atlas connection string to MONGODB_URI in .env.
+   Keep MONGODB_DB_NAME=smartshift. Never share or commit .env.
+5. In Atlas Network Access, allow your current public IP for local development.
 
-------------------------------------------------------------------------------
- HOW TO RUN LOCALLY (Offline demo or API-backed mode)
-------------------------------------------------------------------------------
+Start the website and API
+-------------------------
+       npm start
 
-Step 1: Open the project folder:
-        D:\FSD_Project\
+Open the local URL printed in PowerShell, usually:
+       http://localhost:3000
 
-Step 2: Double-click 'index.html' to open the Master Landing Page in any
-        modern browser (Google Chrome, Microsoft Edge, Brave, Firefox, Safari).
+If port 3000 is already in use, use another PowerShell window or stop the
+process using that port. Alternatively, start SmartShift on port 3001:
+       $env:PORT = "3001"
+       npm start
+Then open:
+       http://localhost:3001
 
-Step 3: (Recommended API-backed mode)
-        Open a terminal in the project folder and run:
-        npm start
-        Then open index.html with Live Server.
-        The API is available at http://localhost:3000/api/health.
-        Run npm test to verify the backend contracts.
+Connection confirmation
+-----------------------
+Atlas mode prints:
+       DATABASE_MODE=atlas database=smartshift
 
-Step 4: (Optional Developer Mode)
-        If using VS Code, right-click 'index.html' and select 'Open with Live Server'.
+If MONGODB_URI is unset, the app starts in local JSON demo mode instead.
 
-------------------------------------------------------------------------------
- QUICK FEATURE WALKTHROUGH & TEST CASES
-------------------------------------------------------------------------------
+First-use account flow
+----------------------
+1. Select Manager and create an account with the cafe/business name.
+2. Open the manager Profile and share its staff invite code with the team.
+3. Add staff in the manager dashboard using their email and job details.
+4. Staff select Staff > Create account and enter the matching email and invite
+   code. This links the account to the manager's cafe and staff record.
+5. Create shifts, assign suitable staff, and publish the roster. Staff can view
+   their confirmed shifts and submit leave requests.
 
-1. Master Landing Page ('index.html'):
-   - Click "⚡ Live Rule Simulator" or "⚡ Test Live Validation Engine Now" on the hero banner.
-   - Test Worker 1 (Alex Rivera) -> All 3 rules pass cleanly (Passed ✅).
-   - Test Worker 2 (Sam Wilson) -> Flags Availability Conflict (Blocked 🚫).
-   - Test Worker 3 (Jordan Lee) -> Flags Skill Certification Mismatch (Blocked 🚫).
-   - Test Worker 4 (Taylor Swift) -> Flags Weekly Overtime Cap Risk (Blocked 🚫).
+View saved Atlas data
+---------------------
+Atlas > SmartShiftCluster > Browse Collections > smartshift > application_state.
+The cafe-specific records are stored in the document's workspaces array.
 
-2. Employee Availability Portal (Staff Portal view):
-   - Click "Staff Portal" in the top navigation.
-   - Tap any slot in the Monday-to-Sunday timetable grid to smoothly cycle:
-     Available  ->  Preferred ⭐  ->  Unavailable ✕  ->  Available
-   - Click "💾 Save & Submit Availability" to trigger the live confirmation toast.
-   - View confirmed upcoming shifts with weekly hours and earnings in Rs.
-
-3. Store Manager Roster Studio (Manager Matrix view):
-   - Click "Manager Roster" in the top navigation.
-   - Tap role filter pills (All Roles, Baristas, Cashiers, Kitchen/Prep) to filter live.
-   - Click "Assign Staff" on any open slot to open the real-time pre-check modal.
-   - Confirm assignment to instantly update the schedule and labor budget counters.
-
-------------------------------------------------------------------------------
- MODULE ALLOCATION (4 MEMBERS)
-------------------------------------------------------------------------------
-- Team Lead (Frontend Architect): index.html, css/styles.css, js/app.js, README.md
-- Member 2 (Employee Portal): employee.html, css/employee.css, js/employee.js
-- Member 3 (Manager Matrix): manager.html, css/manager.css, js/manager.js
-- Member 4 (Middleware & Data): js/mockData.js, js/validation.js, css/validation.css
-
-Thank you! 
+Deployment
+----------
+Deploy after confirming the local Atlas-backed flows. Keep MONGODB_URI in the
+hosting provider's private environment settings; never put it in browser code
+or commit it to Git.

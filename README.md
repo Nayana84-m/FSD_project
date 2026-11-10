@@ -1,135 +1,80 @@
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com/?font=Segoe+UI&weight=700&size=45&pause=1000&color=A78BFA&center=true&vCenter=true&width=700&height=70&lines=SmartShift" alt="SmartShift" />
-</p>
+# SmartShift
 
-<p align="center">
-  <img src="https://readme-typing-svg.demolab.com/?font=Segoe+UI&size=20&pause=1200&color=94A3B8&center=true&vCenter=true&width=600&lines=Smart+Worksite+Roster+%26+Shift+Manager" alt="tagline" />
-</p>
+SmartShift helps cafes and small teams plan staff schedules using skills, availability, weekly hour limits, and leave requests. Managers create a cafe workspace, build and publish its roster, and review leave. Staff join their manager's cafe with an invite code and use their own staff portal.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Phase-1-7c3aed?style=for-the-badge" />
-</p>
+## What it includes
 
-<br>
+- Responsive landing page, sign in, and role-based manager and staff screens
+- Manager signup with a cafe or business name and a staff invite code
+- Staff signup that joins the matching cafe workspace
+- Per-cafe staff, shifts, availability, leave requests, and roster status
+- Automatic workspace refresh about every four seconds while a user is signed in
+- Shift assignment checks for skills and maximum weekly hours
+- Profile updates saved through the authenticated API
+- MongoDB Atlas persistence, with a local JSON demo mode when Atlas is not configured
 
-## 📖 Introduction
+## Run locally
 
-**SmartShift** is a workforce scheduling platform built to replace manual, spreadsheet-based rostering. Store managers and café teams get conflict-free, automated weekly schedules — backed by a lightweight client-side validation engine that catches problems before a shift is ever confirmed.
+Requirements: Node.js 18 or later and npm.
 
-Built with a responsive vanilla JavaScript SPA and a dependency-free Node.js REST API. The browser still supports a file-based demo mode, while the API adds authenticated persistence for local end-to-end testing.
+1. Open a terminal in the project folder and install dependencies:
 
-<br>
+   ```powershell
+   npm install
+   ```
 
-## 🌫️ The Problem
+2. If you do not already have a `.env` file, create one from the example:
 
-Most small teams still schedule shifts using manual spreadsheets and WhatsApp messages — a process that quietly breaks down as the team grows.
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-| Manual method | What goes wrong |
-|---|---|
-| 📊 **Manual spreadsheets** | Hours are tracked by hand, so it's easy to miss when an employee has been assigned past their contracted weekly limit — leading to unnoticed **overtime violations**. |
-| 💬 **WhatsApp messages** | Availability and shift swaps get buried in chat threads, leaving managers with **no central visibility** into who is actually free to work. |
+3. In `.env`, set `MONGODB_URI` to your Atlas connection string, set its database user password in the URI, and keep `MONGODB_DB_NAME=smartshift`. Keep `.env` private; it is ignored by Git.
 
-SmartShift replaces both of these with a single, structured system — so scheduling decisions are based on real data, not scattered messages.
+4. In MongoDB Atlas, add your current public IP to the project's Network Access list for local development. Do not put the IP address in the app code.
 
-<br>
+5. Start the app:
 
-## 🧠 Smart Validation Engine
+   ```powershell
+   npm start
+   ```
 
-```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#7c3aed','primaryTextColor':'#fff','primaryBorderColor':'#a78bfa','lineColor':'#a78bfa','tertiaryColor':'#1a1233'}}}%%
-flowchart LR
-    S[New Shift] --> C1{Skill Check}
-    C1 -- ✅ --> C2{Availability Check}
-    C1 -- ❌ --> X[🚫 Blocked]
-    C2 -- ✅ --> C3{Overtime Check}
-    C2 -- ❌ --> X
-    C3 -- ✅ --> OK[✅ Confirmed]
-    C3 -- ❌ --> X
+6. Open the local address printed in the terminal (usually `http://localhost:3000`). If port 3000 is already in use, run `$env:PORT = "3001"` before `npm start`, then open `http://localhost:3001`.
+
+When connected to Atlas, the terminal prints `DATABASE_MODE=atlas database=smartshift`. Without `MONGODB_URI`, the app uses local JSON demo data. Atlas account passwords and application account passwords are separate credentials.
+
+## First-use flow
+
+1. Create a Manager account and enter the cafe name.
+2. In the Manager Profile, copy the staff invite code.
+3. Add a staff member with their email and job details, then give them the invite code.
+4. Staff select Staff, choose Create account, and enter the same email and invite code. Their account joins that cafe and claims the matching staff record.
+5. Create shifts, assign staff, and publish the roster. Staff can then see their confirmed shifts and submit leave requests.
+
+Each manager account has its own cafe workspace. Staff only receive their own schedule and leave details; the cafe manager can manage their workspace team and roster.
+
+## View data in Atlas
+
+In Atlas, open the cluster's **Browse Collections** view, then open the `smartshift` database and `application_state` collection. The application currently stores its state in the document with `_id: "smartshift"`; cafe workspaces are under `workspaces`.
+
+## Project layout
+
+```text
+assets/              Images and other static assets
+css/                 Page and component styles
+js/                  UI, authentication, validation, and API client
+server/              Node.js API and MongoDB/local data access
+tests/               Existing automated checks
+index.html           Single-page application
 ```
 
-> The same rules are demonstrated in the UI and enforced again by the API before assignments are written.
+## Configuration
 
-<br>
+| Variable | Purpose |
+| --- | --- |
+| `MONGODB_URI` | Atlas connection string; leave unset for local JSON mode |
+| `MONGODB_DB_NAME` | Database name, defaults to `smartshift` |
+| `MONGODB_DNS_SERVERS` | DNS resolver used for Atlas lookup; defaults to `8.8.8.8` |
+| `PORT` | Local or hosting provider server port; defaults to `3000` |
 
-## ✨ Key Features
-
-- 🗂️ **Employee Availability** — staff submit preferred/unavailable weekly slots
-- ✅ **Smart Validation** — automated skill, availability, and overtime checks
-- 📋 **Shift Management** — managers assign shifts against role requirements
-- ⏱️ **Weekly Hours Tracker** — employees track upcoming shifts and totals
-
-<br>
-
-## 🛠️ Tech Stack
-
-```mermaid
-flowchart TB
-    H[HTML5] --- Csx[CSS3] --- J[Vanilla JS ES6+]
-    J --> A[Node.js REST API]
-    A --> D[(JSON database)]
-    A --> S[Token sessions]
-```
-
-The API uses Node's built-in modules, so no dependency installation is required.
-
-<br>
-
-## ▶️ Getting Started
-
-```bash
-git clone https://github.com/Nayana84-m/FSD_project.git
-```
-
-Open `index.html` for offline demo mode, or run the API for the full local flow:
-
-```bash
-npm start
-# then open http://localhost:3000/../index.html with Live Server,
-# or open index.html directly and use the demo fallback.
-```
-
-Demo accounts:
-
-- Manager: `manager@smartshift.local` / `manager123`
-- Employee: `alex.rivera@smartshift.com` / `employee123`
-
-Run automated checks with `npm test`.
-
-<br>
-
-## 📁 Project Architecture
-
-```
-FSD_project/
-├── assets/
-├── css/
-├── js/
-├── server/             # REST API, data access, and local database
-├── tests/              # API contract and business-rule tests
-├── package.json
-├── .gitignore
-├── HOW_TO_RUN.txt
-├── LICENSE
-├── README.md
-└── index.html
-```
-
-<br>
-
-## ✅ Faculty Rubric Coverage
-
-- **Frontend & responsiveness:** responsive landing page, employee timetable, manager roster, keyboard support, focus states, and mobile layout.
-- **Backend & APIs:** health, login, workers, shifts, availability update, and assignment endpoints with validation and consistent JSON responses.
-- **Database integration:** structured users, workers, shifts, and audit log persisted in `server/data/db.json`.
-- **Authentication & security:** role-aware login, expiring bearer sessions, input validation, CORS control, and security response headers.
-- **Verification:** automated tests cover the health contract, login contract, and certification policy.
-
-<br>
-
-<p align="center">
-  <sub>Phase 1 · CIE-1 · BSc Computer Science · Full Stack Development Course</sub>
-</p>
+Deployment is intentionally left for after the local Atlas-backed flows are confirmed. Never commit `.env` or publish database credentials.

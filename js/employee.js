@@ -25,13 +25,18 @@ const timeSlots = [
   { key: "evening", label: "Evening (6pm - 10pm)" }
 ];
 
+function escapeEmployeeText(value) {
+  return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+}
+
 // Current logged-in worker (Alex Rivera)
 let currentWorker = window.mockDatabase.workers[0];
+let availabilityHasUnsavedChanges = false;
 
 function resolveCurrentWorker() {
   const session = window.SmartShiftAuth?.getSession();
   if (session?.role === 'employee') {
-    currentWorker = window.mockDatabase.workers.find(worker => worker.id === session.id) || currentWorker;
+    currentWorker = window.mockDatabase.workers.find(worker => worker.id === (session.workerId || session.id)) || currentWorker;
   }
   return currentWorker;
 }
@@ -48,7 +53,7 @@ function renderEmployeeSummary() {
   if (name) name.textContent = worker.name;
   if (role) role.textContent = worker.role;
   if (certifications) certifications.innerHTML = (worker.certifications || []).length
-    ? worker.certifications.map(skill => `<span class="badge badge-info">${skill}</span>`).join(' ')
+    ? worker.certifications.map(skill => `<span class="badge badge-info">${escapeEmployeeText(skill)}</span>`).join(' ')
     : '<span class="badge">Skills pending</span>';
   if (hours) hours.textContent = worker.currentAssignedHours || 0;
   if (maxHours) maxHours.textContent = worker.maxWeeklyHours || 25;
@@ -84,18 +89,34 @@ function initLeaveRequestForm() {
   const form = document.getElementById('leaveRequestForm');
   if (!form || form.dataset.bound) return;
   form.dataset.bound = 'true';
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
     const worker = resolveCurrentWorker();
     const startDate = document.getElementById('leaveStartDate').value;
     const endDate = document.getElementById('leaveEndDate').value;
     if (endDate < startDate) return window.showToast?.('Leave end date must be after the start date.', 'danger', 9000);
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    const requestData = { startDate, endDate, reason: document.getElementById('leaveReason').value.trim() };
+    try {
+      let savedRequest;
+      if (window.SmartShiftAPI) {
+        const result = await window.SmartShiftAPI.createLeaveRequest(requestData);
+        savedRequest = result.request;
+      } else {
+        savedRequest = { id: `leave_${Date.now()}`, workerId: worker.id, ...requestData, status: 'pending' };
+      }
     window.mockDatabase.leaveRequests = window.mockDatabase.leaveRequests || [];
-    window.mockDatabase.leaveRequests.push({ id: `leave_${Date.now()}`, workerId: worker.id, startDate, endDate, reason: document.getElementById('leaveReason').value, status: 'pending' });
-    window.persistMockDatabase?.();
+      if (!window.mockDatabase.leaveRequests.some(item => item.id === savedRequest.id)) window.mockDatabase.leaveRequests.push(savedRequest);
+      if (!window.SmartShiftAPI) window.persistMockDatabase?.();
     renderLeaveRequests(worker);
     form.reset();
     window.showToast?.('Leave request sent to your manager.', 'success');
+    } catch (error) {
+      window.showToast?.(error.message || 'Could not send your leave request.', 'danger');
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 }
 
@@ -156,6 +177,7 @@ function initAvailabilityGrid() {
 }
 
 function handleSlotClick(cell, dayKey, slotKey) {
+  availabilityHasUnsavedChanges = true;
   const statusCycle = {
     available: "preferred",
     preferred: "unavailable",
@@ -185,25 +207,33 @@ function formatStatusLabel(status) {
 
 function initSaveButton() {
   const saveBtn = document.getElementById("btnSaveAvailability");
-  if (!saveBtn) return;
+  if (!saveBtn || saveBtn.dataset.bound === "true") return;
+  saveBtn.dataset.bound = "true";
 
-  saveBtn.addEventListener("click", () => {
+  saveBtn.addEventListener("click", async () => {
     saveBtn.innerText = "⏳ Saving...";
     saveBtn.disabled = true;
-
-    setTimeout(() => {
+    try {
+      if (window.SmartShiftAPI) await window.SmartShiftAPI.saveAvailability(currentWorker.id, currentWorker.availability);
+      if (window.persistMockDatabase && !window.SmartShiftAPI) window.persistMockDatabase();
+      availabilityHasUnsavedChanges = false;
       saveBtn.innerText = "💾 Save My Schedule";
       saveBtn.disabled = false;
-      if (window.showToast) {
-        window.showToast("Your weekly schedule was saved and synced to your manager! 🎉", "success");
-      }
-      if (window.persistMockDatabase) window.persistMockDatabase();
-      if (window.SmartShiftAPI) window.SmartShiftAPI.saveAvailability(currentWorker.id, currentWorker.availability);
-    }, 500);
+      window.showToast?.("Your availability was saved for your manager.", "success");
+    } catch (error) {
+      saveBtn.innerText = "💾 Save My Schedule";
+      window.showToast?.(error.message || "Could not save your availability.", "danger");
+    } finally {
+      saveBtn.disabled = false;
+    }
   });
 }
 
 window.initAvailabilityGrid = initAvailabilityGrid;
 window.initSaveButton = initSaveButton;
 window.initLeaveRequestForm = initLeaveRequestForm;
+window.hasUnsavedAvailabilityChanges = () => availabilityHasUnsavedChanges;
+window.refreshEmployeeWorkspace = function refreshEmployeeWorkspace() {
+  renderEmployeeSummary();
+};
 

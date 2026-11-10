@@ -381,6 +381,15 @@
             <label for="fullName">Full name</label>
             <input type="text" id="fullName" placeholder="Alex Rivera" autocomplete="name">
           </div>
+          <div class="form-group signup-only" id="businessNameSignupGroup" hidden>
+            <label for="businessName">Cafe or business name</label>
+            <input type="text" id="businessName" placeholder="e.g. Downtown Cafe" autocomplete="organization" maxlength="80">
+          </div>
+          <div class="form-group signup-only" id="joinCodeSignupGroup" hidden>
+            <label for="joinCode">Manager invite code</label>
+            <input type="text" id="joinCode" placeholder="8-character code from your manager" autocomplete="off" minlength="8" maxlength="8" autocapitalize="characters" aria-describedby="joinCodeHelp">
+            <small id="joinCodeHelp">Ask your manager for the code shown on their Profile page.</small>
+          </div>
           <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" value="employee123" autocomplete="current-password" minlength="8" required>
@@ -500,7 +509,7 @@
         <div class="toolbar-flex">
           <button id="managerSidebarToggle" class="manager-menu-toggle" type="button" aria-controls="managerSidebar" aria-expanded="false"><span></span><span></span><span></span><span class="sr-only">Open roster filters</span></button>
           <div>
-            <h2 style="font-size:1.5rem; font-weight:800;">Downtown Cafe - Weekly Schedule</h2>
+            <h2 style="font-size:1.5rem; font-weight:800;"><span id="managerBusinessTitle">Downtown Cafe</span> - Weekly Schedule</h2>
             <p style="font-size:0.85rem; color:var(--text-secondary);"><span id="managerBusinessName">Downtown Cafe</span> &bull; Smart Conflict Prevention Active 🛡️ <span id="managerRosterStatus" class="roster-status draft">Draft roster</span></p>
           </div>
           <div class="manager-actions">
@@ -558,9 +567,12 @@
           <div class="setup-card-heading"><div><span class="section-tag">Plan ahead</span><h3>Create a shift</h3></div><button id="btnCloseShiftForm" class="modal-close-btn" type="button">&times;</button></div>
           <form id="createShiftForm" class="setup-form">
             <label>Day<input type="date" id="newShiftDate" required></label>
-            <label>Time<input type="text" id="newShiftTime" placeholder="8:00 AM - 1:00 PM" required></label>
+            <div class="shift-time-range">
+              <label>Start time<input type="time" id="newShiftStartTime" step="900" required></label>
+              <label>End time<input type="time" id="newShiftEndTime" step="900" required></label>
+            </div>
             <label>Required skill<select id="newShiftRole"><option>Barista</option><option>Cashier</option><option>Food Safety</option><option>Shift Lead</option></select></label>
-            <label>Hours<input type="number" id="newShiftDuration" min="1" max="12" value="5" required></label>
+            <label>Shift length<input type="number" id="newShiftDuration" min="0.25" max="12" step="0.25" value="" placeholder="Calculated from start and end" readonly required></label>
             <button class="btn btn-primary" type="submit">Add shift to roster</button>
           </form>
         </div>
@@ -568,6 +580,7 @@
           <div class="setup-card-heading"><div><span class="section-tag">Grow your team</span><h3>Add staff member</h3></div><button id="btnCloseStaffForm" class="modal-close-btn" type="button">&times;</button></div>
           <form id="addStaffForm" class="setup-form">
             <label>Full name<input type="text" id="newStaffName" placeholder="Priya Sharma" required></label>
+            <label>Staff email<input type="email" id="newStaffEmail" placeholder="staff@example.com" required></label>
             <label>Role<select id="newStaffRole"><option>Part-Time Barista</option><option>Part-Time Cashier</option><option>Kitchen Assistant</option></select></label>
             <label>Skills<input type="text" id="newStaffSkills" placeholder="Barista, Food Safety" required></label>
             <label>Max weekly hours<input type="number" id="newStaffMaxHours" min="1" max="60" value="25" required></label>
@@ -628,7 +641,7 @@
       <div class="profile-grid">
         <section class="profile-card"><span class="section-tag">Account details</span><div class="profile-detail"><span>Name</span><strong id="profileDetailName">—</strong></div><div class="profile-detail"><span>Email</span><strong id="profileDetailEmail">—</strong></div><div class="profile-detail"><span>Role</span><strong id="profileDetailRole">—</strong></div></section>
         <section class="profile-card"><span class="section-tag">Workspace access</span><h3 id="profileWorkspaceTitle">Your workspace</h3><p id="profileWorkspaceText">You can access your assigned SmartShift tools from here.</p><button id="btnProfileWorkspace" class="btn btn-primary">Open workspace</button><button id="btnLogout" class="btn btn-outline">Log out</button></section>
-        <section class="profile-card profile-edit-card"><span class="section-tag">Profile settings</span><h3>Keep your details up to date</h3><form id="profileEditForm" class="profile-edit-form"><label>Full name<input id="profileEditName" type="text" required></label><label>Work email<input id="profileEditEmail" type="email" required></label><div id="profileManagerFields"><label>Business name<input id="profileEditBusiness" type="text" placeholder="Downtown Cafe"></label></div><div id="profileStaffFields"><label>Skills and certifications<input id="profileEditSkills" type="text" placeholder="Barista, Food Safety"></label><div class="profile-form-row"><label>Max weekly hours<input id="profileEditMaxHours" type="number" min="1" max="60"></label><label>Hourly pay (Rs.)<input id="profileEditRate" type="number" min="1"></label></div></div><button class="btn btn-primary" type="submit">Save profile</button></form></section>
+        <section class="profile-card profile-edit-card"><span class="section-tag">Profile settings</span><h3>Keep your details up to date</h3><form id="profileEditForm" class="profile-edit-form"><label>Full name<input id="profileEditName" type="text" required></label><label>Work email<input id="profileEditEmail" type="email" required></label><div id="profileManagerFields"><label>Business name<input id="profileEditBusiness" type="text" placeholder="Downtown Cafe"></label><label>Staff invite code<input id="profileInviteCode" type="text" readonly></label><small>Share this code with staff so they can join your cafe workspace.</small></div><div id="profileStaffFields"><label>Skills and certifications<input id="profileEditSkills" type="text" placeholder="Barista, Food Safety"></label><div class="profile-form-row"><label>Max weekly hours<input id="profileEditMaxHours" type="number" min="1" max="60"></label><label>Hourly pay (Rs.)<input id="profileEditRate" type="number" min="1"></label></div></div><button class="btn btn-primary" type="submit">Save profile</button></form></section>
       </div>
     </main>
   </div>

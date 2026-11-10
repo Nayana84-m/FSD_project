@@ -23,8 +23,8 @@ const SmartValidator = {
    * Check 2: Availability
    */
   checkAvailability: function (worker, shift) {
-    const dayAvailability = worker.availability[shift.day];
-    const slotStatus = dayAvailability ? dayAvailability[shift.timeSlot] : "unavailable";
+    const dayAvailability = worker.availability?.[shift.day];
+    const slotStatus = dayAvailability?.[shift.timeSlot] || "available";
 
     const isAvailable = slotStatus === "available" || slotStatus === "preferred";
     return {

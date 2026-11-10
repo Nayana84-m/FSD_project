@@ -162,12 +162,40 @@ if (!mockDatabase.leaveRequests.length) {
   ];
 }
 
-window.persistMockDatabase = function persistMockDatabase() {
+let workspaceSaveQueue = Promise.resolve();
+let workspaceSavePending = 0;
+window.persistMockDatabase = function persistMockDatabase(options = {}) {
+  const session = window.SmartShiftAuth?.getSession();
+  const storageKey = session?.workspaceId ? `${STORAGE_KEY}:${session.workspaceId}` : STORAGE_KEY;
+  const snapshot = {
+    workers: mockDatabase.workers,
+    shifts: mockDatabase.shifts,
+    leaveRequests: mockDatabase.leaveRequests || [],
+    rosterStatus: mockDatabase.rosterStatus || "draft",
+    publishedAt: mockDatabase.publishedAt || null
+  };
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockDatabase));
+    window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
   } catch (error) {
     console.warn("SmartShift could not save local demo data.", error);
   }
+
+  if (options.sync === false || session?.role !== "manager" || !window.SmartShiftAPI) return Promise.resolve(true);
+  const requestSnapshot = JSON.parse(JSON.stringify(snapshot));
+  workspaceSavePending += 1;
+  workspaceSaveQueue = workspaceSaveQueue
+    .catch(() => {})
+    .then(() => window.SmartShiftAPI.saveWorkspace(requestSnapshot))
+    .then(() => true)
+    .catch(error => {
+      window.showToast?.(error.message || "Could not sync this cafe workspace to the database.", "danger");
+      return false;
+    })
+    .finally(() => {
+      workspaceSavePending = Math.max(0, workspaceSavePending - 1);
+    });
+  return workspaceSaveQueue;
 };
+window.hasPendingWorkspaceSave = () => workspaceSavePending > 0;
 
 window.mockDatabase = mockDatabase;

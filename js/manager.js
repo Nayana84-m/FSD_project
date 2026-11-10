@@ -8,10 +8,51 @@ document.addEventListener("DOMContentLoaded", () => {
   initFilterPills();
   initAssignModal();
   initPublishButton();
+  initShiftTimeInputs();
 });
 
 let currentFilter = "all";
 let activeShiftToAssign = null;
+
+function parseShiftTimeRange(startValue, endValue) {
+  const toMinutes = value => {
+    const match = String(value).match(/^(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+    return hour <= 23 && minute <= 59 ? hour * 60 + minute : null;
+  };
+  const start = toMinutes(startValue);
+  let end = toMinutes(endValue);
+  if (start === null || end === null) return null;
+  if (end <= start) end += 24 * 60;
+  const hours = (end - start) / 60;
+  if (hours <= 0 || hours > 12) return null;
+  return { start, end, hours, timeSlot: start < 12 * 60 ? 'morning' : start < 18 * 60 ? 'afternoon' : 'evening' };
+}
+
+function formatShiftClock(minutes) {
+  const clockMinutes = minutes % (24 * 60);
+  const hour24 = Math.floor(clockMinutes / 60);
+  const minute = String(clockMinutes % 60).padStart(2, '0');
+  const period = hour24 < 12 ? 'AM' : 'PM';
+  const hour12 = hour24 % 12 || 12;
+  return `${hour12}:${minute} ${period}`;
+}
+
+function initShiftTimeInputs() {
+  const startInput = document.getElementById('newShiftStartTime');
+  const endInput = document.getElementById('newShiftEndTime');
+  const durationInput = document.getElementById('newShiftDuration');
+  if (!startInput || !endInput || !durationInput || durationInput.dataset.bound === 'true') return;
+  durationInput.dataset.bound = 'true';
+  const updateDuration = () => {
+    const range = parseShiftTimeRange(startInput.value, endInput.value);
+    durationInput.value = range ? Number(range.hours.toFixed(2)) : '';
+  };
+  startInput.addEventListener('input', updateDuration);
+  endInput.addEventListener('input', updateDuration);
+}
 
 function recommendationScore(worker, shift) {
   const result = window.SmartValidator.validateAssignment(worker.id, shift.id);
@@ -171,21 +212,28 @@ function initAssignModal() {
   }
 
   if (btnConfirm) {
-    btnConfirm.addEventListener("click", () => {
+    btnConfirm.addEventListener("click", async () => {
       if (!activeShiftToAssign) return;
       const selectedWorkerId = workerSelect.value;
-
-      activeShiftToAssign.assignedWorkerId = selectedWorkerId;
-      const assignedDay = activeShiftToAssign.dayName;
       const assignedWorker = window.mockDatabase.workers.find(worker => worker.id === selectedWorkerId);
-      if (assignedWorker) assignedWorker.currentAssignedHours += activeShiftToAssign.duration;
-      if (window.persistMockDatabase) window.persistMockDatabase();
-      if (window.SmartShiftAPI) window.SmartShiftAPI.assignShift(activeShiftToAssign.id, selectedWorkerId);
+      const shift = activeShiftToAssign;
+      const assignedDay = shift.dayName;
+      const previousWorker = window.mockDatabase.workers.find(worker => worker.id === shift.assignedWorkerId);
+      btnConfirm.disabled = true;
+      try {
+        if (window.SmartShiftAPI) await window.SmartShiftAPI.assignShift(shift.id, selectedWorkerId);
+        if (previousWorker && previousWorker.id !== selectedWorkerId) previousWorker.currentAssignedHours = Math.max(0, previousWorker.currentAssignedHours - shift.duration);
+        shift.assignedWorkerId = selectedWorkerId;
+        if (assignedWorker && previousWorker?.id !== selectedWorkerId) assignedWorker.currentAssignedHours += shift.duration;
+        window.persistMockDatabase?.({ sync: !window.SmartShiftAPI });
 
-      closeModal();
-      initRosterGrid();
-      if (window.showToast) {
-        window.showToast(`Yay! Shift successfully assigned to ${assignedDay}! 🎉`, "success");
+        closeModal();
+        initRosterGrid();
+        window.showToast?.(`Shift assigned for ${assignedDay}.`, "success");
+      } catch (error) {
+        window.showToast?.(error.message || "Could not assign this shift.", "danger");
+      } finally {
+        btnConfirm.disabled = false;
       }
     });
   }
@@ -273,19 +321,26 @@ function initPublishButton() {
 
   if (publishBtn.dataset.bound === 'true') return;
   publishBtn.dataset.bound = 'true';
-  publishBtn.addEventListener("click", () => {
+  publishBtn.addEventListener("click", async () => {
+    const previousStatus = window.mockDatabase.rosterStatus;
+    const previousPublishedAt = window.mockDatabase.publishedAt;
     window.mockDatabase.rosterStatus = 'published';
     window.mockDatabase.publishedAt = new Date().toISOString();
-    window.persistMockDatabase?.();
+    publishBtn.disabled = true;
+    const saved = await window.persistMockDatabase?.();
+    publishBtn.disabled = false;
+    if (saved === false) {
+      window.mockDatabase.rosterStatus = previousStatus;
+      window.mockDatabase.publishedAt = previousPublishedAt;
+      return;
+    }
     const status = document.getElementById('managerRosterStatus');
     if (status) {
       status.textContent = 'Published roster';
       status.className = 'roster-status published';
     }
     publishBtn.querySelector('span').textContent = '✓ Roster Published';
-    if (window.showToast) {
-      window.showToast("🚀 Roster Published! All staff have been notified.", "success");
-    }
+    window.showToast?.("🚀 Roster published. Staff can now view their confirmed shifts.", "success");
   });
 }
 
@@ -302,7 +357,7 @@ function renderStaffDirectory() {
   container.innerHTML = workers.map(worker => `
     <div class="staff-directory-row">
       <div class="staff-directory-avatar">${worker.avatar || '👤'}</div>
-      <div class="staff-directory-info"><strong>${escapeHtml(worker.name)}</strong><span>${escapeHtml(worker.role)} · ${(worker.certifications || []).join(', ') || 'Skills pending'}</span><span>${(window.mockDatabase.leaveRequests || []).filter(request => request.workerId === worker.id && request.status === 'pending').length ? '⏳ Leave request pending' : '✓ No pending leave'}</span></div>
+      <div class="staff-directory-info"><strong>${escapeHtml(worker.name)}</strong><span>${escapeHtml(worker.role)} · ${(worker.certifications || []).map(escapeHtml).join(', ') || 'Skills pending'}</span><span>${(window.mockDatabase.leaveRequests || []).filter(request => request.workerId === worker.id && request.status === 'pending').length ? '⏳ Leave request pending' : '✓ No pending leave'}</span></div>
       <div class="staff-directory-hours"><strong>${worker.currentAssignedHours || 0}/${worker.maxWeeklyHours || 0}h</strong><span>Rs. ${worker.hourlyRate || 0}/hr</span></div>
     </div>`).join('');
 }
@@ -324,9 +379,11 @@ function renderLeaveApprovals() {
   }).join('');
 }
 
-function processLeaveRequest(requestId, action) {
+async function processLeaveRequest(requestId, action) {
   const request = (window.mockDatabase.leaveRequests || []).find(item => item.id === requestId);
   if (!request) return;
+  try {
+    if (window.SmartShiftAPI) await window.SmartShiftAPI.updateLeaveRequest(requestId, action);
   request.status = action;
   if (action === 'approved') {
     const worker = window.mockDatabase.workers.find(item => item.id === request.workerId);
@@ -335,10 +392,13 @@ function processLeaveRequest(requestId, action) {
     const days = Math.max(1, Math.round((end - start) / 86400000) + 1);
     if (worker) worker.leaveBalance = Math.max(0, (worker.leaveBalance ?? 12) - days);
   }
-  window.persistMockDatabase?.();
+    if (!window.SmartShiftAPI) window.persistMockDatabase?.();
   renderLeaveApprovals();
   renderStaffDirectory();
   window.showToast?.(`Leave request ${action}.`, action === 'approved' ? 'success' : 'info');
+  } catch (error) {
+    window.showToast?.(error.message || 'Could not update the leave request.', 'danger');
+  }
 }
 
 function initManagerSetup() {
@@ -371,34 +431,55 @@ function initManagerSetup() {
     if (button) processLeaveRequest(button.dataset.leaveId, button.dataset.leaveAction);
   });
 
-  document.getElementById('createShiftForm')?.addEventListener('submit', event => {
+  document.getElementById('createShiftForm')?.addEventListener('submit', async event => {
     event.preventDefault();
     const date = document.getElementById('newShiftDate').value;
     const role = document.getElementById('newShiftRole').value;
     const duration = Number(document.getElementById('newShiftDuration').value);
+    const startTime = document.getElementById('newShiftStartTime').value;
+    const endTime = document.getElementById('newShiftEndTime').value;
+    const timeRange = parseShiftTimeRange(startTime, endTime);
+    if (!timeRange) {
+      window.showToast?.('Choose a valid shift up to 12 hours long.', 'danger');
+      document.getElementById('newShiftStartTime').focus();
+      return;
+    }
+    const timeLabel = `${formatShiftClock(timeRange.start)} - ${formatShiftClock(timeRange.end)}`;
     const dayName = new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
-    window.mockDatabase.shifts.push({
-      id: `shift_${Date.now()}`, day: dayName.toLowerCase(), dayName, timeSlot: 'morning',
-      timeLabel: document.getElementById('newShiftTime').value, duration, requiredRole: role,
+    const shift = {
+      id: `shift_${Date.now()}`, day: dayName.toLowerCase(), dayName, timeSlot: timeRange.timeSlot,
+      timeLabel, duration, requiredRole: role,
       department: role === 'Cashier' ? 'Front Register' : role === 'Food Safety' ? 'Kitchen Prep' : 'Cafe Floor', assignedWorkerId: null
-    });
-    window.persistMockDatabase?.();
+    };
+    window.mockDatabase.shifts.push(shift);
+    const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    const saved = await window.persistMockDatabase?.();
+    if (submitButton) submitButton.disabled = false;
+    if (saved === false) {
+      window.mockDatabase.shifts = window.mockDatabase.shifts.filter(item => item.id !== shift.id);
+      return;
+    }
     initRosterGrid();
     toggle(shiftCard, false);
     event.target.reset();
     window.showToast?.('Shift added to this week’s roster.', 'success');
   });
 
-  document.getElementById('addStaffForm')?.addEventListener('submit', event => {
+  document.getElementById('addStaffForm')?.addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
     if (form.dataset.submitting === 'true') return;
     const name = document.getElementById('newStaffName').value.trim();
+    const email = document.getElementById('newStaffEmail').value.trim().toLowerCase();
     const role = document.getElementById('newStaffRole').value;
     const skills = document.getElementById('newStaffSkills').value.split(',').map(skill => skill.trim()).filter(Boolean);
-    const duplicate = window.mockDatabase.workers.some(worker => worker.name.trim().toLowerCase() === name.toLowerCase() && worker.role === role);
+    const duplicate = window.mockDatabase.workers.some(worker =>
+      worker.name.trim().toLowerCase() === name.toLowerCase() && worker.role === role
+      || String(worker.email || '').trim().toLowerCase() === email
+    );
     if (duplicate) {
-      window.showToast?.('A team member with this name and role is already listed.', 'danger');
+      window.showToast?.('This team member or email is already listed.', 'danger');
       document.getElementById('newStaffName').focus();
       return;
     }
@@ -406,12 +487,18 @@ function initManagerSetup() {
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Adding…'; }
     const worker = {
-      id: `emp_${Date.now()}`, name, role,
+      id: `emp_${Date.now()}`, name, email, role,
       certifications: skills, maxWeeklyHours: Number(document.getElementById('newStaffMaxHours').value), currentAssignedHours: 0,
       hourlyRate: Number(document.getElementById('newStaffRate').value), availability: {}
     };
     window.mockDatabase.workers.push(worker);
-    window.persistMockDatabase?.();
+    const saved = await window.persistMockDatabase?.();
+    if (saved === false) {
+      window.mockDatabase.workers = window.mockDatabase.workers.filter(item => item.id !== worker.id);
+      form.dataset.submitting = 'false';
+      if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Add team member'; }
+      return;
+    }
     renderStaffDirectory();
     form.reset();
     toggle(staffFormCard, false);
@@ -423,6 +510,15 @@ function initManagerSetup() {
     if (teamToggle) { teamToggle.textContent = 'Hide team'; teamToggle.setAttribute('aria-expanded', 'true'); }
   });
 }
+
+window.refreshManagerWorkspace = function refreshManagerWorkspace() {
+  const assignModal = document.getElementById('assignModal');
+  if (assignModal?.classList.contains('active')) return;
+  initRosterGrid();
+  renderStaffDirectory();
+  renderLeaveApprovals();
+  initPublishButton();
+};
 
 window.initRosterGrid = initRosterGrid;
 window.initFilterPills = initFilterPills;
