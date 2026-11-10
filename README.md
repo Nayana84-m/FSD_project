@@ -1,6 +1,6 @@
 # SmartShift
 
-<p align="center"><img src="assets/smartshift-schedule.gif" alt="A friendly team roster with opening, midday, and closing shifts" width="720" /></p>
+<p align="center"><img src="assets/smartshift-team-roster.gif" alt="A friendly team roster with opening, midday, and closing shifts" width="720" /></p>
 
 **Staff scheduling for cafes and small teams.** Build rosters around skills, availability, weekly hour limits, and leave requests.
 
