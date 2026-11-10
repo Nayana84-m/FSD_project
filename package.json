@@ -5,7 +5,7 @@
   "description": "Smart workforce scheduling platform with a responsive SPA and REST API.",
   "scripts": {
     "start": "node server/server.js",
-    "test": "node --test tests/server.test.js"
+    "test": "node --test tests"
   },
   "engines": {
     "node": ">=18"

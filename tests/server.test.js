@@ -11,20 +11,23 @@ test("assignment policy blocks a missing certification", () => {
 });
 
 test("health endpoint and login endpoint respond with API contracts", async () => {
-  await new Promise(resolve => server.listen(0, resolve));
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   const port = server.address().port;
-  const health = await fetch(`http://localhost:${port}/api/health`);
-  assert.equal(health.status, 200);
-  assert.equal((await health.json()).ok, true);
+  try {
+    const health = await fetch(`http://127.0.0.1:${port}/api/health`);
+    assert.equal(health.status, 200);
+    assert.equal((await health.json()).ok, true);
 
-  const login = await fetch(`http://localhost:${port}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: "manager@smartshift.local", password: "manager123", role: "manager" })
-  });
-  const payload = await login.json();
-  assert.equal(login.status, 200);
-  assert.equal(payload.data.user.role, "manager");
-  assert.ok(payload.data.token);
-  await new Promise(resolve => server.close(resolve));
+    const login = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "manager@smartshift.local", password: "manager123", role: "manager" })
+    });
+    const payload = await login.json();
+    assert.equal(login.status, 200);
+    assert.equal(payload.data.user.role, "manager");
+    assert.ok(payload.data.token);
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+  }
 });
