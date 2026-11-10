@@ -1,5 +1,7 @@
 # SmartShift
 
+<p align="center"><img src="assets/smartshift-schedule.gif" alt="A cheerful coffee cup beside a weekly cafe roster" width="720" /></p>
+
 **Staff scheduling for cafes and small teams.** Build rosters around skills, availability, weekly hour limits, and leave requests.
 
 ![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853D?style=flat-square&logo=node.js&logoColor=white) ![MongoDB Atlas](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white) ![Vanilla JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=222) ![MIT License](https://img.shields.io/badge/License-MIT-8B7CF6?style=flat-square)
