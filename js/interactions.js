@@ -10,10 +10,18 @@ function switchView(targetView, scrollToSectionId = null) {
   const views = ['landing', 'login', 'employee', 'manager', 'profile'];
   const session = window.SmartShiftAuth?.getSession();
 
-  const wrongRole = (targetView === 'employee' || targetView === 'manager') && (!session || session.role !== targetView);
-  if (wrongRole || (targetView === 'profile' && !session)) {
+  const wrongRole = (targetView === 'employee' || targetView === 'manager') && session && session.role !== targetView;
+  if (wrongRole) {
+    window.SmartShiftAuth.clearSession();
+    window.localStorage.removeItem('smartshift-token');
+    updateAuthNav();
+    setLoginRole(targetView);
     targetView = 'login';
-    if (window.showToast) window.showToast('Please log in with the matching role to continue.', 'info');
+  } else if ((targetView === 'employee' || targetView === 'manager') && !session) {
+    setLoginRole(targetView);
+    targetView = 'login';
+  } else if (targetView === 'profile' && !session) {
+    targetView = 'login';
   }
   
   views.forEach(v => {
@@ -71,8 +79,23 @@ function switchView(targetView, scrollToSectionId = null) {
 
 window.switchView = switchView;
 
+function setLoginRole(role) {
+  window.smartShiftSelectedRole = role;
+  document.querySelectorAll('.auth-role-card').forEach(card => {
+    const active = card.dataset.role === role;
+    card.classList.toggle('active', active);
+    card.setAttribute('aria-pressed', String(active));
+  });
+  const email = document.getElementById('email');
+  const password = document.getElementById('password');
+  if (email) email.value = role === 'manager' ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
+  if (password) password.value = role === 'manager' ? 'manager123' : 'employee123';
+  const helper = document.getElementById('authHelper');
+  if (helper) helper.textContent = `Welcome back. Log in to continue to your ${role === 'manager' ? 'manager' : 'staff'} workspace.`;
+}
+
 // Global Toast Notification Helper
-function showToast(msg, type = 'info', duration = 6000) {
+function showToast(msg, type = 'info', duration = 5000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toastEl = document.createElement('div');
@@ -278,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.auth-role-card').forEach(card => card.addEventListener('click', () => {
       selectedRole = card.dataset.role;
+      window.smartShiftSelectedRole = selectedRole;
       updateAuthForm();
     }));
     document.querySelectorAll('.auth-tab').forEach(tab => tab.addEventListener('click', () => {
@@ -288,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      selectedRole = window.smartShiftSelectedRole || selectedRole;
       const email = document.getElementById('email')?.value.trim();
       const password = document.getElementById('password')?.value;
       const submitButton = loginForm.querySelector('button[type="submit"]');
@@ -320,12 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
             window.mockDatabase.workers.push({ id: offlineUser.id, name: offlineUser.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
             window.persistMockDatabase?.();
           }
-          showToast('API is offline. Local demo mode is enabled and this account is saved in your browser.', 'info', 9000);
+          showToast('API is offline. Local demo mode is enabled and this account is saved in your browser.', 'info');
           switchView(selectedRole);
         } catch (fallbackError) {
           authFeedback.textContent = fallbackError.message || 'Unable to complete authentication.';
           authFeedback.hidden = false;
-          showToast(authFeedback.textContent, 'danger', 9000);
+          showToast(authFeedback.textContent, 'danger');
         }
       } finally {
         if (submitButton) submitButton.disabled = false;

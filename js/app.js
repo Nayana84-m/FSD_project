@@ -31,7 +31,7 @@ function showToast(message, type = "success") {
     toast.style.transform = "translateY(20px)";
     toast.style.transition = "all 0.3s ease";
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 5000);
 }
 
 window.showToast = showToast;

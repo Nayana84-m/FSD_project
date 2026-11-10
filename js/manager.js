@@ -356,7 +356,10 @@ function initManagerSetup() {
   const toggle = (card, open) => { if (card) card.hidden = !open; };
   document.getElementById('btnOpenShiftForm')?.addEventListener('click', () => toggle(shiftCard, true));
   document.getElementById('btnCloseShiftForm')?.addEventListener('click', () => toggle(shiftCard, false));
-  document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => toggle(staffFormCard, true));
+  document.getElementById('btnOpenStaffForm')?.addEventListener('click', () => {
+    toggle(staffFormCard, true);
+    document.getElementById('newStaffName')?.focus();
+  });
   document.getElementById('btnCloseStaffForm')?.addEventListener('click', () => toggle(staffFormCard, false));
   document.getElementById('btnToggleStaffDirectory')?.addEventListener('click', event => {
     const open = directoryCard.classList.toggle('is-collapsed') === false;
@@ -388,18 +391,36 @@ function initManagerSetup() {
 
   document.getElementById('addStaffForm')?.addEventListener('submit', event => {
     event.preventDefault();
+    const form = event.currentTarget;
+    if (form.dataset.submitting === 'true') return;
+    const name = document.getElementById('newStaffName').value.trim();
+    const role = document.getElementById('newStaffRole').value;
     const skills = document.getElementById('newStaffSkills').value.split(',').map(skill => skill.trim()).filter(Boolean);
+    const duplicate = window.mockDatabase.workers.some(worker => worker.name.trim().toLowerCase() === name.toLowerCase() && worker.role === role);
+    if (duplicate) {
+      window.showToast?.('A team member with this name and role is already listed.', 'danger');
+      document.getElementById('newStaffName').focus();
+      return;
+    }
+    form.dataset.submitting = 'true';
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Adding…'; }
     const worker = {
-      id: `emp_${Date.now()}`, name: document.getElementById('newStaffName').value.trim(), role: document.getElementById('newStaffRole').value,
+      id: `emp_${Date.now()}`, name, role,
       certifications: skills, maxWeeklyHours: Number(document.getElementById('newStaffMaxHours').value), currentAssignedHours: 0,
       hourlyRate: Number(document.getElementById('newStaffRate').value), availability: {}
     };
     window.mockDatabase.workers.push(worker);
     window.persistMockDatabase?.();
     renderStaffDirectory();
-    toggle(staffCard, false);
-    event.target.reset();
+    form.reset();
+    toggle(staffFormCard, false);
+    form.dataset.submitting = 'false';
+    if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Add team member'; }
     window.showToast?.(`${worker.name} was added to your team.`, 'success');
+    document.getElementById('staffDirectoryCard')?.classList.remove('is-collapsed');
+    const teamToggle = document.getElementById('btnToggleStaffDirectory');
+    if (teamToggle) { teamToggle.textContent = 'Hide team'; teamToggle.setAttribute('aria-expanded', 'true'); }
   });
 }
 
