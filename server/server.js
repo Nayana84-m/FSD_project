@@ -1,9 +1,34 @@
 const http = require("node:http");
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { readDb, writeDb, seedFromPrototype } = require("./db");
 
 const port = Number(process.env.PORT || 3000);
 const sessions = new Map();
+const projectRoot = path.join(__dirname, "..");
+const contentTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".json": "application/json; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".ico": "image/x-icon" };
+
+function serveApp(request, response, pathname) {
+  const requestedPath = pathname === "/" ? "/index.html" : decodeURIComponent(pathname);
+  const filePath = path.resolve(projectRoot, `.${requestedPath}`);
+  if (!filePath.startsWith(`${projectRoot}${path.sep}`)) {
+    response.writeHead(403);
+    return response.end("Forbidden");
+  }
+  fs.readFile(filePath, (error, contents) => {
+    if (error) {
+      response.writeHead(error.code === "ENOENT" ? 404 : 500, { "Content-Type": "text/plain; charset=utf-8" });
+      return response.end(error.code === "ENOENT" ? "Not found" : "Unable to load the application");
+    }
+    response.writeHead(200, {
+      "Content-Type": contentTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY"
+    });
+    response.end(contents);
+  });
+}
 
 function sendJson(response, status, payload) {
   response.writeHead(status, {
@@ -44,8 +69,9 @@ function validateAssignment(worker, shift) {
 
 async function handle(request, response) {
   if (request.method === "OPTIONS") return sendJson(response, 204, {});
-  const db = seedFromPrototype(readDb());
   const url = new URL(request.url, `http://${request.headers.host}`);
+  if (request.method === "GET" && !url.pathname.startsWith("/api/")) return serveApp(request, response, url.pathname);
+  const db = seedFromPrototype(readDb());
   const parts = url.pathname.split("/").filter(Boolean);
 
   if (request.method === "GET" && url.pathname === "/api/health") return sendJson(response, 200, { ok: true, service: "smartshift-api" });
