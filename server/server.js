@@ -58,12 +58,29 @@ function readBody(request) {
   });
 }
 
+const AVAILABILITY_BLOCKS = [
+  { key: "morning", start: 8 * 60, end: 13 * 60 },
+  { key: "afternoon", start: 13 * 60, end: 18 * 60 },
+  { key: "evening", start: 18 * 60, end: 22 * 60 }
+];
+
+function shiftAvailabilitySlots(shift) {
+  if (Array.isArray(shift?.timeSlots) && shift.timeSlots.length) return shift.timeSlots;
+  const start = Number(shift?.startMinutes);
+  const end = Number(shift?.endMinutes);
+  if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+    const slots = AVAILABILITY_BLOCKS.filter(block => start < block.end && end > block.start).map(block => block.key);
+    if (slots.length) return slots;
+  }
+  return [shift?.timeSlot].filter(Boolean);
+}
+
 function validateAssignment(worker, shift) {
   if (!worker || !shift) return { valid: false, message: "Worker or shift not found." };
   const skillMatch = (worker.certifications || []).includes(shift.requiredRole);
-  const slotStatus = worker.availability?.[shift.day]?.[shift.timeSlot] || "available";
-  const available = slotStatus === "available" || slotStatus === "preferred";
-  const withinHours = worker.currentAssignedHours + shift.duration <= worker.maxWeeklyHours;
+  const slotStatuses = shiftAvailabilitySlots(shift).map(slot => worker.availability?.[shift.day]?.[slot] || "available");
+  const available = slotStatuses.every(status => status === "available" || status === "preferred");
+  const withinHours = Number(worker.currentAssignedHours || 0) + Number(shift.duration) <= Number(worker.maxWeeklyHours || 0);
   const failedChecks = [!skillMatch && "required skill", !available && "availability", !withinHours && "weekly hours"].filter(Boolean);
   return {
     valid: failedChecks.length === 0,
@@ -193,7 +210,7 @@ async function handle(request, response) {
       id: workspace.id,
       businessName: workspace.businessName,
       workers: workspace.workers.filter(worker => worker.userId === session.userId || worker.id === session.workerId),
-      shifts: workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId),
+      shifts: workspace.rosterStatus === "published" ? workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId) : [],
       leaveRequests: workspace.leaveRequests.filter(item => item.workerId === session.workerId),
       rosterStatus: workspace.rosterStatus,
       publishedAt: workspace.publishedAt
@@ -208,7 +225,7 @@ async function handle(request, response) {
 
   if (request.method === "GET" && url.pathname === "/api/shifts") {
     if (!workspace) return sendJson(response, 404, { error: "Your cafe workspace was not found." });
-    const shifts = session.role === "manager" ? workspace.shifts : workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId);
+    const shifts = session.role === "manager" ? workspace.shifts : workspace.rosterStatus === "published" ? workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId) : [];
     return sendJson(response, 200, { data: shifts });
   }
 
@@ -217,6 +234,12 @@ async function handle(request, response) {
     const body = await readBody(request);
     if (!Array.isArray(body.workers) || !Array.isArray(body.shifts)) return sendJson(response, 400, { error: "Workspace data is incomplete." });
     const currentWorkers = new Map(workspace.workers.map(worker => [worker.id, worker]));
+    const workerIds = new Set();
+    if (body.workers.length > 250 || body.shifts.length > 1000) return sendJson(response, 400, { error: "This cafe has reached the supported team or roster size." });
+    for (const worker of body.workers) {
+      if (!worker || typeof worker.id !== "string" || !worker.id.trim() || workerIds.has(worker.id)) return sendJson(response, 400, { error: "A team member has invalid or duplicate details." });
+      workerIds.add(worker.id);
+    }
     workspace.workers = body.workers.map(worker => {
       const current = currentWorkers.get(worker.id);
       if (!current) return worker;
@@ -234,6 +257,19 @@ async function handle(request, response) {
         leaveBalance: current.leaveBalance
       };
     });
+    const currentShifts = new Map(workspace.shifts.map(shift => [shift.id, shift]));
+    const allowedDays = new Set(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
+    const allowedRoles = new Set(["Barista", "Cashier", "Food Safety", "Shift Lead", "Kitchen Prep"]);
+    const shiftIds = new Set();
+    for (const shift of body.shifts) {
+      if (!shift || typeof shift.id !== "string" || !shift.id.trim() || shiftIds.has(shift.id) || !allowedDays.has(shift.day) || !allowedRoles.has(shift.requiredRole) || !Number.isFinite(Number(shift.duration)) || Number(shift.duration) <= 0 || Number(shift.duration) > 12 || typeof shift.timeLabel !== "string" || shift.timeLabel.length > 80 || (shift.timeSlots && (!Array.isArray(shift.timeSlots) || shift.timeSlots.some(slot => !["morning", "afternoon", "evening"].includes(slot))))) {
+        return sendJson(response, 400, { error: "A shift has invalid or incomplete details." });
+      }
+      shiftIds.add(shift.id);
+      shift.duration = Number(shift.duration);
+      const savedShift = currentShifts.get(shift.id);
+      shift.assignedWorkerId = savedShift?.assignedWorkerId && workerIds.has(savedShift.assignedWorkerId) ? savedShift.assignedWorkerId : null;
+    }
     workspace.shifts = body.shifts;
     workspace.rosterStatus = body.rosterStatus === "published" ? "published" : "draft";
     workspace.publishedAt = workspace.rosterStatus === "published" ? body.publishedAt || new Date().toISOString() : null;
@@ -335,6 +371,7 @@ async function handle(request, response) {
     const shift = workspace?.shifts.find(item => item.id === parts[2]);
     const body = await readBody(request);
     const worker = workspace?.workers.find(item => item.id === body.workerId);
+    if (!shift || !worker) return sendJson(response, 404, { error: "Choose an existing shift and team member." });
     if (shift?.assignedWorkerId === worker?.id) return sendJson(response, 200, { data: shift });
     const result = validateAssignment(worker, shift);
     if (!result.valid) return sendJson(response, 422, { error: result.message });

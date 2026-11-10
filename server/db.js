@@ -6,7 +6,7 @@ const { promisify } = require("node:util");
 const { MongoClient } = require("mongodb");
 const scrypt = promisify(crypto.scrypt);
 
-const dbPath = path.join(__dirname, "data", "db.json");
+const dbPath = process.env.SMARTSHIFT_DATA_FILE || path.join(__dirname, "data", "db.json");
 let client;
 let mongoDb;
 let useMongo = false;
@@ -102,7 +102,9 @@ function ensureWorkspaces(state) {
     }
     const workspace = state.workspaces.find(item => item.id === employee.workspaceId);
     if (workspace) {
-      const linkedWorker = workspace.workers.find(worker => worker.userId === employee.id || worker.id === employee.id);
+      const linkedWorker = workspace.workers.find(worker =>
+        worker.userId === employee.id || worker.id === employee.workerId || worker.id === employee.id
+      );
       const worker = linkedWorker || (state.workers || []).find(item => item.id === employee.id) || {
         id: employee.id,
         name: employee.name,

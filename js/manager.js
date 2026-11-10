@@ -28,7 +28,14 @@ function parseShiftTimeRange(startValue, endValue) {
   if (end <= start) end += 24 * 60;
   const hours = (end - start) / 60;
   if (hours <= 0 || hours > 12) return null;
-  return { start, end, hours, timeSlot: start < 12 * 60 ? 'morning' : start < 18 * 60 ? 'afternoon' : 'evening' };
+  const blocks = [
+    { key: 'morning', start: 8 * 60, end: 13 * 60 },
+    { key: 'afternoon', start: 13 * 60, end: 18 * 60 },
+    { key: 'evening', start: 18 * 60, end: 22 * 60 }
+  ];
+  const timeSlots = blocks.filter(block => start < block.end && end > block.start).map(block => block.key);
+  const timeSlot = timeSlots[0] || (start < 12 * 60 ? 'morning' : start < 18 * 60 ? 'afternoon' : 'evening');
+  return { start, end, hours, timeSlot, timeSlots: timeSlots.length ? timeSlots : [timeSlot] };
 }
 
 function formatShiftClock(minutes) {
@@ -448,6 +455,7 @@ function initManagerSetup() {
     const dayName = new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
     const shift = {
       id: `shift_${Date.now()}`, day: dayName.toLowerCase(), dayName, timeSlot: timeRange.timeSlot,
+      timeSlots: timeRange.timeSlots, startMinutes: timeRange.start, endMinutes: timeRange.end,
       timeLabel, duration, requiredRole: role,
       department: role === 'Cashier' ? 'Front Register' : role === 'Food Safety' ? 'Kitchen Prep' : 'Cafe Floor', assignedWorkerId: null
     };

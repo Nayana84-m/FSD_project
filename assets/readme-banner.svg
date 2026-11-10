@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">SmartShift</title>
+  <desc id="desc">A cheerful weekly scheduling board with a teal and lavender gradient.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ddfbf3"/>
+      <stop offset=".55" stop-color="#edf4ff"/>
+      <stop offset="1" stop-color="#fff0dc"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#05a77d"/>
+      <stop offset="1" stop-color="#47d8aa"/>
+    </linearGradient>
+    <filter id="shadow" x="-.2" y="-.2" width="1.4" height="1.5">
+      <feDropShadow dx="0" dy="10" stdDeviation="13" flood-color="#486d93" flood-opacity=".13"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="300" rx="28" fill="url(#bg)"/>
+  <circle cx="1100" cy="42" r="86" fill="#fff" opacity=".35"/>
+  <circle cx="70" cy="284" r="110" fill="#fff" opacity=".35"/>
+  <g transform="translate(88 66)">
+    <rect width="66" height="66" rx="20" fill="url(#mark)"/>
+    <path d="M37 10 22 36h11l-5 20 19-29H36l7-17z" fill="#ffe26b"/>
+    <text x="84" y="46" fill="#18243a" font-family="Inter,Arial,sans-serif" font-size="45" font-weight="750">SmartShift</text>
+    <text x="4" y="125" fill="#42516b" font-family="Inter,Arial,sans-serif" font-size="24">A happier way to plan a team’s week ✨</text>
+    <text x="4" y="166" fill="#65728a" font-family="Inter,Arial,sans-serif" font-size="17">Skills • availability • shifts • leave, all in one cozy place</text>
+  </g>
+  <g transform="translate(748 54)" filter="url(#shadow)">
+    <rect width="365" height="192" rx="22" fill="#fff"/>
+    <rect width="365" height="48" rx="22" fill="#f8fbff"/>
+    <path d="M0 26v22h365V26" fill="#f8fbff"/>
+    <circle cx="24" cy="24" r="5" fill="#ffb58c"/><circle cx="42" cy="24" r="5" fill="#ffd66b"/><circle cx="60" cy="24" r="5" fill="#75d9b4"/>
+    <text x="82" y="29" fill="#50607a" font-family="Arial,sans-serif" font-size="13">This week · team roster</text>
+    <g font-family="Arial,sans-serif" font-size="12" fill="#53617a">
+      <text x="23" y="82">MON</text><text x="23" y="125">WED</text><text x="23" y="168">FRI</text>
+    </g>
+    <g>
+      <rect x="77" y="60" width="255" height="31" rx="10" fill="#e5f8f1"/><text x="93" y="80" fill="#167f68" font-family="Arial,sans-serif" font-size="13">9:00 — Barista shift</text>
+      <rect x="77" y="103" width="210" height="31" rx="10" fill="#f0ebff"/><text x="93" y="123" fill="#6651a0" font-family="Arial,sans-serif" font-size="13">1:00 — Cafe floor</text>
+      <rect x="77" y="146" width="232" height="31" rx="10" fill="#fff2df"/><text x="93" y="166" fill="#966318" font-family="Arial,sans-serif" font-size="13">4:00 — Cashier shift</text>
+    </g>
+  </g>
+</svg>

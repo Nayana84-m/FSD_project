@@ -24,16 +24,17 @@ const SmartValidator = {
    */
   checkAvailability: function (worker, shift) {
     const dayAvailability = worker.availability?.[shift.day];
-    const slotStatus = dayAvailability?.[shift.timeSlot] || "available";
-
-    const isAvailable = slotStatus === "available" || slotStatus === "preferred";
+    const slots = Array.isArray(shift.timeSlots) && shift.timeSlots.length ? shift.timeSlots : [shift.timeSlot];
+    const blockedSlot = slots.find(slot => dayAvailability?.[slot] === "unavailable");
+    const slotStatus = blockedSlot ? "unavailable" : slots.some(slot => dayAvailability?.[slot] === "preferred") ? "preferred" : "available";
+    const isAvailable = !blockedSlot;
     return {
       rule: "Staff Free Time Check 📅",
       passed: isAvailable,
       icon: isAvailable ? (slotStatus === "preferred" ? "⭐" : "✅") : "❌",
       detail: isAvailable
-        ? `Worker marked ${shift.dayName} (${shift.timeSlot}) as '${slotStatus === "preferred" ? "Loved Shift ⭐" : "Available 🟢"}'.`
-        : `Worker marked ${shift.dayName} (${shift.timeSlot}) as 'Busy / Can't Work 🔴'.`
+        ? `Worker marked ${shift.dayName} (${slots.join(" + ")}) as '${slotStatus === "preferred" ? "Loved Shift ⭐" : "Available 🟢"}'.`
+        : `Worker marked ${shift.dayName} (${blockedSlot}) as 'Busy / Can't Work 🔴'.`
     };
   },
 
