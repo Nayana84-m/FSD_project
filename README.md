@@ -1,20 +1,25 @@
 # SmartShift
 
-<p align="center"><img src="assets/smartshift-team-roster.gif" alt="A friendly team roster with opening, midday, and closing shifts" width="720" /></p>
+<p align="center"><strong>Good shifts. Happier teams.</strong><br />A people-first roster planner for restaurants and small businesses.</p>
 
-**Staff scheduling for cafes and small teams.** Build rosters around skills, availability, weekly hour limits, and leave requests.
+<p align="center">
+  <a href="https://smartshift-pzj2.onrender.com"><img src="https://img.shields.io/badge/OPEN_THE_LIVE_APP-0D9875?style=for-the-badge&logo=render&logoColor=white" alt="Open the live SmartShift app" /></a>
+  &nbsp; <a href="#run-it-on-your-computer">Run it locally ↓</a>
+</p>
+
+<p align="center"><img src="assets/smartshift-team-roster.gif" alt="A friendly team roster with opening, midday, and closing shifts" width="720" /></p>
 
 ![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853D?style=flat-square&logo=node.js&logoColor=white) ![MongoDB Atlas](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white) ![Vanilla JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=222) ![MIT License](https://img.shields.io/badge/License-MIT-8B7CF6?style=flat-square)
 
-## 🌷 Is SmartShift ready?
+## 💚 Try the live app
 
-**The core app is ready for a hosted student/demo deployment** once the hosting environment has its MongoDB Atlas settings and production mode configured. Managers can create a cafe, invite staff, build and publish a roster, and review leave requests. Staff can join their cafe, set availability, request leave, and see their own assigned shifts.
+**[Launch SmartShift →](https://smartshift-pzj2.onrender.com)**
 
-It is a prototype, not yet hardened for handling real employee records at business scale. Read [Before a public launch](#before-a-public-launch) before sharing a public URL.
+The app is hosted on Render’s free plan, so the first visit after a quiet period can take around 50 seconds while it wakes up. This is a student project preview, not a production service for real employee records.
 
-## ☕ The problem it solves
+## 🧭 The idea
 
-Small hospitality teams often coordinate schedules through spreadsheets and messages. That makes it easy to miss a skill requirement, availability conflict, weekly hour limit, or leave request. SmartShift keeps those details together so a manager can build a roster with fewer manual checks and staff can see the schedule that belongs to them.
+Small businesses and restaurants often plan shifts in spreadsheets and messages. SmartShift brings staff skills, availability, weekly hour limits, and leave requests into one place, helping managers plan with fewer manual checks while giving each staff member a clear view of their own schedule.
 
 ## ✨ What you can do
 
@@ -78,9 +83,9 @@ The terminal prints `DATABASE_MODE=atlas database=smartshift` when Atlas connect
 
 ## 🌐 Deploy a free demo on Render
 
-The repository includes `render.yaml` for a Render web service. In Render, choose **New → Blueprint**, connect this GitHub repository, and follow the prompts. Render asks for `MONGODB_URI`; enter your Atlas application connection string as a secret. The blueprint sets production mode, uses the Atlas database, and checks `/api/health` after starting.
+The [live preview](https://smartshift-pzj2.onrender.com) is deployed from this repository using the Render Blueprint in `render.yaml`. It runs the Node.js app as one web service and stores app data in MongoDB Atlas. The Atlas connection string is kept in Render’s private environment settings, not in the repository.
 
-After the service is created, open its **Connect → Outbound** details and add the listed Render IP ranges to your Atlas **Network Access** allowlist. Render can use any of the outbound addresses shown for the selected region. Then open your service URL, confirm the home page loads, and visit `/api/health`; it should report `"database":"atlas"`.
+To create a separate copy, choose **New → Blueprint** in Render, connect this GitHub repository, and provide `MONGODB_URI` privately when prompted. The Blueprint sets production mode, uses the Atlas database, and checks `/api/health` after starting. Render’s outbound IP ranges can be found under **Connect → Outbound** and added to Atlas **Network Access**. The health endpoint should report `"database":"atlas"` when the database connection is working.
 
 Render’s free web services sleep after 15 minutes without traffic and may take about a minute to wake. Their local files are temporary, so keep `MONGODB_URI` configured to use Atlas for persistent app data. See [Render’s free service limits](https://render.com/docs/free) and [outbound IP guide](https://render.com/docs/outbound-ip-addresses).
 
