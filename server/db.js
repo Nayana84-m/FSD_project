@@ -234,4 +234,10 @@ async function closeDatabase() {
   if (client) await client.close();
 }
 
-module.exports = { dbPath, connectDatabase, readDb, writeDb, closeDatabase, secureUserPassword, verifyUserPassword };
+async function databaseStatus() {
+  if (!useMongo) return "local-json";
+  await mongoDb.command({ ping: 1 });
+  return "atlas";
+}
+
+module.exports = { dbPath, connectDatabase, readDb, writeDb, closeDatabase, databaseStatus, secureUserPassword, verifyUserPassword };

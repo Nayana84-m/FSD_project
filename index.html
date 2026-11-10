@@ -113,9 +113,8 @@
 
       <div class="nav-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLogin">Login</button>
+        <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignup">Sign up</button>
         <button class="btn btn-ghost spa-nav-link" data-target-view="profile" id="btnProfile" hidden>Profile</button>
-        <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStarted">Staff Portal</button>
-        <button class="btn btn-outline spa-nav-link" data-target-view="manager">Manager Admin</button>
       </div>
 
       <!-- Hamburger (mobile) -->
@@ -131,7 +130,7 @@
       <a href="#" data-role-nav="manager" data-target-view="manager" class="mobile-link spa-nav-link">Manager Dashboard</a>
       <div class="mobile-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
-        <button class="btn btn-primary spa-nav-link" data-target-view="employee" id="btnGetStartedM">Staff Portal</button>
+        <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignupM">Sign up</button>
       </div>
     </div>
   </header>
@@ -139,7 +138,7 @@
   <!-- ======================================================
        VIEW 1: LANDING PAGE VIEW (#view-landing)
        ====================================================== -->
-  <div id="view-landing" class="app-view">
+  <div id="view-landing" class="app-view active">
 
     <!-- HERO -->
     <section class="hero" id="home">
@@ -157,8 +156,8 @@
             SmartShift helps managers create better work schedules by considering employee availability, required skills, and weekly working-hour limits.
           </p>
           <div class="hero-btns">
-            <button class="btn btn-primary btn-lg spa-nav-link" data-target-view="employee">Open Staff Portal</button>
-            <button class="btn btn-outline btn-lg spa-nav-link" data-target-view="manager">Open Manager Matrix</button>
+            <button class="btn btn-primary btn-lg spa-nav-link" data-target-view="login" data-auth-mode="signup">Get started</button>
+            <button class="btn btn-outline btn-lg spa-nav-link" data-target-view="login" data-auth-mode="login">Log in</button>
           </div>
         </div>
 
@@ -346,7 +345,7 @@
   <!-- ======================================================
        VIEW 2: AUTHENTICATION (#view-login)
        ====================================================== -->
-  <div id="view-login" class="app-view active">
+  <div id="view-login" class="app-view">
     <div class="login-wrapper">
       <div class="login-container">
         <div class="logo-section">

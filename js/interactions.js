@@ -119,19 +119,17 @@ function updateAuthNav() {
   const session = window.SmartShiftAuth?.getSession();
   const profileButton = document.getElementById('btnProfile');
   const loginButton = document.getElementById('btnLogin');
+  const signupButton = document.getElementById('btnSignup');
+  const mobileLoginButton = document.getElementById('btnLoginM');
+  const mobileSignupButton = document.getElementById('btnSignupM');
   if (profileButton) profileButton.hidden = !session;
   if (loginButton) loginButton.hidden = Boolean(session);
+  if (signupButton) signupButton.hidden = Boolean(session);
+  if (mobileLoginButton) mobileLoginButton.hidden = Boolean(session);
+  if (mobileSignupButton) mobileSignupButton.hidden = Boolean(session);
   document.body.classList.toggle('workspace-mode', Boolean(session));
   document.querySelectorAll('[data-public-nav="true"]').forEach(link => { link.hidden = Boolean(session); });
   document.querySelectorAll('[data-role-nav]').forEach(link => { link.hidden = !session || link.dataset.roleNav !== session.role; });
-  const staffButton = document.getElementById('btnGetStarted');
-  const mobileStaffButton = document.getElementById('btnGetStartedM');
-  const managerButton = document.querySelector('[data-target-view="manager"].btn-outline');
-  const mobileManagerButton = document.querySelector('.mobile-actions [data-target-view="manager"]');
-  if (staffButton) staffButton.hidden = Boolean(session);
-  if (mobileStaffButton) mobileStaffButton.hidden = Boolean(session);
-  if (managerButton) managerButton.hidden = Boolean(session);
-  if (mobileManagerButton) mobileManagerButton.hidden = Boolean(session);
 }
 
 let workspacePollingTimer = null;
@@ -245,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const view = targetLink.dataset.targetView;
       switchView(view);
+      if (targetLink.dataset.authMode) window.setSmartShiftAuthMode?.(targetLink.dataset.authMode);
       return;
     }
 
@@ -384,6 +383,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authFeedback.hidden = true;
       authFeedback.textContent = '';
+    };
+
+    window.setSmartShiftAuthMode = mode => {
+      if (!['login', 'signup'].includes(mode)) return;
+      authMode = mode;
+      updateAuthForm();
     };
 
     const localAuthentication = () => {

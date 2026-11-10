@@ -76,14 +76,22 @@ Open **http://localhost:3000** in your browser. If port `3000` is already occupi
 
 The terminal prints `DATABASE_MODE=atlas database=smartshift` when Atlas connects, or `DATABASE_MODE=local-json` in local demo mode. The app will stop with a clear connection error if Atlas is configured but unreachable.
 
+## 🌐 Deploy a free demo on Render
+
+The repository includes `render.yaml` for a Render web service. In Render, choose **New → Blueprint**, connect this GitHub repository, and follow the prompts. Render asks for `MONGODB_URI`; enter your Atlas application connection string as a secret. The blueprint sets production mode, uses the Atlas database, and checks `/api/health` after starting.
+
+After the service is created, open its **Connect → Outbound** details and add the listed Render IP ranges to your Atlas **Network Access** allowlist. Render can use any of the outbound addresses shown for the selected region. Then open your service URL, confirm the home page loads, and visit `/api/health`; it should report `"database":"atlas"`.
+
+Render’s free web services sleep after 15 minutes without traffic and may take about a minute to wake. Their local files are temporary, so keep `MONGODB_URI` configured to use Atlas for persistent app data. See [Render’s free service limits](https://render.com/docs/free) and [outbound IP guide](https://render.com/docs/outbound-ip-addresses).
+
 ## 🪄 First time through
 
-1. Choose **Manager** and create an account with your cafe name.
-2. Open your profile and copy the cafe invite code.
-3. Add staff from the manager dashboard. Add their email and skills so assignments can be checked.
-4. Give the invite code to your team. Staff choose **Staff**, create an account with the same email, and enter the code.
-5. Create shifts, assign team members, and publish the roster.
-6. Staff can sign in to see their own schedule, set availability, and request leave.
+1. Start on the public home page, then choose **Sign up** in the header or **Get started** on the page.
+2. Choose **Manager** and create an account with the cafe name.
+3. In the Manager Profile, copy the staff invite code.
+4. Add staff from the manager dashboard. Add their email and skills so assignments can be checked.
+5. Give the invite code to your team. Staff choose **Sign up**, select **Staff**, and enter the same email and invite code.
+6. Create shifts, assign team members, and publish the roster. Staff can then see their own schedule, set availability, and request leave.
 
 Each manager has a separate cafe workspace. Staff accounts join one workspace through its invite code. A manager sees their own cafe’s team and roster; staff accounts receive their own shifts and leave information.
 
@@ -102,6 +110,7 @@ SmartShift/
 ├── js/              Sign-in, API client, manager, staff, and UI behavior
 ├── server/          Node.js REST API and database connection
 ├── tests/           API workflow and UI smoke checks
+├── render.yaml      Free Render service configuration
 ├── index.html       Landing page and application screens
 ├── .env.example     Safe configuration template
 └── package.json     Start and test commands

@@ -3,7 +3,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
-const { connectDatabase, readDb, writeDb, closeDatabase, secureUserPassword, verifyUserPassword } = require("./db");
+const { connectDatabase, readDb, writeDb, closeDatabase, databaseStatus, secureUserPassword, verifyUserPassword } = require("./db");
 
 const port = Number(process.env.PORT || 3000);
 const sessions = new Map();
@@ -141,7 +141,13 @@ async function handle(request, response) {
   if (request.method === "GET" && !url.pathname.startsWith("/api/")) return serveApp(request, response, url.pathname);
   const parts = url.pathname.split("/").filter(Boolean);
 
-  if (request.method === "GET" && url.pathname === "/api/health") return sendJson(response, 200, { ok: true, service: "smartshift-api", database: process.env.MONGODB_URI ? "atlas-configured" : "local-json" });
+  if (request.method === "GET" && url.pathname === "/api/health") {
+    try {
+      return sendJson(response, 200, { ok: true, service: "smartshift-api", database: await databaseStatus() });
+    } catch {
+      return sendJson(response, 503, { ok: false, service: "smartshift-api", database: "unavailable" });
+    }
+  }
   const db = await readDb();
 
   if (request.method === "POST" && url.pathname === "/api/auth/login") {
@@ -403,7 +409,7 @@ if (require.main === module) {
       }
       return connectDatabase();
     })
-    .then(() => server.listen(port, () => console.log(`SmartShift API running at http://localhost:${port}`)))
+    .then(() => server.listen(port, "0.0.0.0", () => console.log(`SmartShift API running on port ${port}`)))
     .catch(error => {
       console.error(`Database connection failed: ${error.message}`);
       process.exitCode = 1;

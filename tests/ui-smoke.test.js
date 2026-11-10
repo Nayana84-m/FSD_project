@@ -8,6 +8,11 @@ test("core role-based screens and workflow controls exist", () => {
   ["view-login", "view-employee", "view-manager", "view-profile", "loginForm", "createShiftForm", "addStaffForm", "leaveRequestForm", "managerLeaveRequests", "employeeUpcomingShifts"].forEach(id => {
     assert.match(html, new RegExp(`id=["']${id}["']`), `missing #${id}`);
   });
+  assert.match(html, /id=["']view-landing["'] class=["']app-view active["']/);
+  assert.match(html, /id=["']btnSignup["']/);
+  assert.match(html, /data-auth-mode=["']signup["']/);
+  assert.match(html, />Get started<\/button>/i);
+  assert.match(html, /id=["']view-login["'] class=["']app-view["']/);
 });
 
 test("application scripts load in dependency order", () => {

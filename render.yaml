@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: smartshift
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_DB_NAME
+        value: smartshift
+      - key: MONGODB_DNS_SERVERS
+        value: 8.8.8.8
+      - key: MONGODB_URI
+        sync: false
