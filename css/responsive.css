@@ -64,6 +64,14 @@
    RESPONSIVE — MOBILE (≤640px)
    ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  .admin-page { padding-top: 6rem; }
+  .admin-hero { align-items: flex-start; }
+  .admin-shield { width: 3.4rem; height: 3.4rem; font-size: 1.7rem; }
+  .admin-stats-grid { grid-template-columns: 1fr 1fr; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-user-row { align-items: flex-start; flex-wrap: wrap; }
+  .admin-user-actions { width: 100%; margin-left: 3rem; }
+  .admin-user-actions .admin-status { margin-right: auto; }
   /* Navbar */
   .nav-links, .nav-actions { 
     display: none; 

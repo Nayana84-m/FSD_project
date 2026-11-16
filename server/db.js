@@ -25,6 +25,31 @@ function defaultBusinessName(user) {
   return `${name}'s Cafe`;
 }
 
+function defaultAdminUser() {
+  return {
+    id: "admin-1",
+    name: process.env.ADMIN_NAME || "SmartShift Admin",
+    email: (process.env.ADMIN_EMAIL || "admin@smartshift.local").toLowerCase(),
+    role: "admin",
+    status: "active",
+    password: process.env.ADMIN_PASSWORD || "admin123"
+  };
+}
+
+function ensureAdminUser(state) {
+  const configuredEmail = (process.env.ADMIN_EMAIL || "admin@smartshift.local").toLowerCase();
+  const existing = (state.users || []).find(user => user.role === "admin" || user.email?.toLowerCase() === configuredEmail);
+  if (existing) {
+    let changed = false;
+    if (existing.role !== "admin") { existing.role = "admin"; changed = true; }
+    if (!existing.status) { existing.status = "active"; changed = true; }
+    return changed;
+  }
+  state.users ||= [];
+  state.users.push(defaultAdminUser());
+  return true;
+}
+
 function ensureWorkspaces(state) {
   let changed = false;
   if (!Array.isArray(state.workspaces)) {
@@ -143,6 +168,7 @@ function makePrototypeState() {
   data.rosterStatus ||= "draft";
   data.publishedAt ||= null;
   data.auditLog ||= [];
+  ensureAdminUser(data);
   for (const user of data.users || []) {
     if (user.role === "manager" && !user.businessName) user.businessName = defaultBusinessName(user);
   }
@@ -175,9 +201,14 @@ async function connectDatabase() {
   } else {
     const { _id, updatedAt, ...state } = existing;
     let changed = ensureWorkspaces(state);
+    if (ensureAdminUser(state)) changed = true;
     for (const user of state.users || []) {
       if (user.role === "manager" && !user.businessName) {
         user.businessName = defaultBusinessName(user);
+        changed = true;
+      }
+      if (user.role === "admin" && !user.status) {
+        user.status = "active";
         changed = true;
       }
       if (user.password && !user.passwordHash) {

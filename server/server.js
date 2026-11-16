@@ -94,6 +94,7 @@ function validateAssignment(worker, shift) {
 
 function publicUser(user, db) {
   const result = { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId || "" };
+  if (user.role === "admin") result.status = user.status || "active";
   if (user.role === "employee") {
     result.workerId = user.workerId || user.id;
     result.businessName = findUserWorkspace(db, user)?.businessName || "";
@@ -154,6 +155,7 @@ async function handle(request, response) {
     const body = await readBody(request);
     const user = db.users.find(item => item.email.toLowerCase() === String(body.email || "").toLowerCase() && item.role === body.role);
     if (!user || !(await verifyUserPassword(user, body.password || ""))) return sendJson(response, 401, { error: "Invalid email, password, or role." });
+    if (user.status === "suspended") return sendJson(response, 403, { error: "This account is suspended. Contact the SmartShift administrator." });
     const token = crypto.randomBytes(24).toString("hex");
     sessions.set(token, { userId: user.id, workerId: user.workerId || user.id, role: user.role, expiresAt: Date.now() + 8 * 60 * 60 * 1000 });
     return sendJson(response, 200, { data: { token, user: publicUser(user, db) } });
@@ -212,6 +214,46 @@ async function handle(request, response) {
   const session = sessions.get(auth);
   const sessionUser = db.users.find(item => item.id === session.userId);
   const workspace = sessionUser && findUserWorkspace(db, sessionUser);
+
+  if (session.role === "admin" && request.method === "GET" && url.pathname === "/api/admin/overview") {
+    const managers = (db.users || []).filter(user => user.role === "manager");
+    const staff = (db.users || []).filter(user => user.role === "employee");
+    const users = (db.users || []).filter(user => user.role !== "admin").map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status || "active",
+      businessName: user.role === "manager" ? user.businessName || "Unnamed business" : "",
+      workspaceId: user.workspaceId || ""
+    }));
+    const workspaces = (db.workspaces || []).map(item => ({
+      id: item.id,
+      businessName: item.businessName,
+      managerName: managers.find(manager => manager.id === item.managerId)?.name || "Unassigned",
+      status: item.rosterStatus || "draft",
+      staffCount: (item.workers || []).length,
+      shiftCount: (item.shifts || []).length,
+      publishedAt: item.publishedAt || null
+    }));
+    return sendJson(response, 200, { data: {
+      stats: { managers: managers.length, staff: staff.length, workspaces: workspaces.length, activeUsers: users.filter(user => user.status !== "suspended").length },
+      users,
+      workspaces,
+      auditLog: (db.auditLog || []).slice(-12).reverse()
+    } });
+  }
+
+  if (session.role === "admin" && request.method === "PUT" && parts[0] === "api" && parts[1] === "admin" && parts[2] === "users" && parts[4] === "status") {
+    const target = (db.users || []).find(user => user.id === parts[3] && user.role !== "admin");
+    if (!target) return sendJson(response, 404, { error: "User not found." });
+    const body = await readBody(request);
+    if (!["active", "suspended"].includes(body.status)) return sendJson(response, 400, { error: "Choose active or suspended." });
+    target.status = body.status;
+    db.auditLog.push({ action: `admin.user.${body.status}`, userId: target.id, by: session.userId, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 200, { data: { user: { id: target.id, status: target.status } } });
+  }
 
   if (request.method === "GET" && url.pathname === "/api/workspace") {
     if (!workspace) return sendJson(response, 404, { error: "Your cafe workspace was not found." });

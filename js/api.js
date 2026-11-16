@@ -56,6 +56,14 @@
     async assignShift(shiftId, workerId) {
       return request(`/shifts/${shiftId}/assign`, { method: "POST", body: JSON.stringify({ workerId }) });
     },
+    async loadAdminOverview() {
+      const result = await request("/admin/overview");
+      return result.data;
+    },
+    async updateAdminUserStatus(userId, status) {
+      const result = await request(`/admin/users/${encodeURIComponent(userId)}/status`, { method: "PUT", body: JSON.stringify({ status }) });
+      return result.data;
+    },
     async isHealthy() {
       try { await request("/health"); return true; } catch { return false; }
     }

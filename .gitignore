@@ -22,3 +22,6 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .env.*.local
+
+# Local presentation captures
+presentation-screenshots/

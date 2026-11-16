@@ -114,6 +114,40 @@ button:disabled { cursor: not-allowed; opacity: 0.62; }
 .profile-edit-form input { border: 1px solid var(--border-strong); border-radius: 9px; padding: 0.7rem; background: white; }
 .profile-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 
+.admin-page { padding: 7rem 0 4rem; }
+.admin-hero { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 2rem; background: linear-gradient(135deg, #ecfdf5, #eff6ff 62%, #fff7ed); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.admin-hero h1 { font: 800 1.8rem var(--font-display); margin: 0.35rem 0; }
+.admin-hero p { color: var(--text-secondary); }
+.admin-shield { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 1.4rem; background: white; font-size: 2.2rem; box-shadow: var(--shadow-md); }
+.admin-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1rem 0; }
+.admin-stat-card, .admin-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.admin-stat-card { padding: 1.15rem; display: grid; gap: 0.25rem; }
+.admin-stat-card span { color: var(--text-secondary); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; }
+.admin-stat-card strong { color: var(--primary); font: 800 1.8rem var(--font-display); }
+.admin-stat-card small, .admin-user-info span, .admin-user-info small, .admin-workspace-row span, .admin-audit-row small { color: var(--text-secondary); font-size: 0.75rem; }
+.admin-grid { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1rem; }
+.admin-card { padding: 1.25rem; }
+.admin-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.admin-card-heading h2 { font-size: 1.15rem; margin-top: 0.3rem; }
+.admin-live-pill, .admin-status, .admin-roster-status { border-radius: var(--radius-pill); padding: 0.35rem 0.6rem; font-size: 0.7rem; font-weight: 800; white-space: nowrap; }
+.admin-live-pill, .admin-status.active { color: #047857; background: var(--primary-bg); }
+.admin-status.suspended { color: #991b1b; background: var(--danger-bg); }
+.admin-users-list, .admin-workspaces-list, .admin-audit-list { display: grid; gap: 0.65rem; }
+.admin-user-row, .admin-workspace-row, .admin-audit-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 12px; }
+.admin-user-avatar { display: grid; place-items: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--primary-bg); }
+.admin-user-info, .admin-workspace-row > div, .admin-audit-row > div { display: grid; min-width: 0; gap: 0.12rem; }
+.admin-user-info span, .admin-user-info small, .admin-workspace-row span, .admin-audit-row small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-actions { display: flex; align-items: center; gap: 0.45rem; margin-left: auto; }
+.admin-user-actions .btn { padding: 0.42rem 0.65rem; font-size: 0.7rem; }
+.admin-workspace-row { justify-content: space-between; }
+.admin-roster-status { color: #92400e; background: var(--warning-bg); text-transform: capitalize; }
+.admin-roster-status.published { color: #047857; background: var(--primary-bg); }
+.admin-audit-card { margin-top: 1rem; }
+.admin-audit-row { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 0.7rem 0; }
+.admin-audit-row:last-child { border-bottom: 0; }
+.admin-audit-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--primary); flex: 0 0 auto; }
+.admin-empty, .admin-loading { padding: 1rem 0; color: var(--text-secondary); font-size: 0.85rem; }
+
 body.workspace-mode .footer { display: none; }
 body.workspace-mode .brand { pointer-events: none; }
 
