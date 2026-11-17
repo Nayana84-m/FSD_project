@@ -32,9 +32,9 @@ Small businesses and restaurants often plan shifts in spreadsheets and messages.
 | Review and respond to leave requests | Update your profile details |
 | Publish the weekly roster for the team | See workspace changes refresh about every 4 seconds |
 
-### Platform admin oversight
+### Business owner administration
 
-SmartShift includes a protected **Platform Admin** role for the SEE demonstration. The admin can view businesses, managers, staff accounts, workspace roster status, and recent activity. They can activate or suspend manager and staff access without entering a cafe’s daily scheduling workflow.
+Every cafe, restaurant, or small business gets its own separate manager workspace. The manager who creates the business account acts as that business’s administrator: they manage their own staff, shifts, leave requests, invite code, and roster. Staff can only access the workspace they join through that business’s invite code.
 
 ### A small, friendly flow
 
@@ -102,7 +102,6 @@ Render’s free web services sleep after 15 minutes without traffic and may take
 5. Give the invite code to your team. Staff choose **Sign up**, select **Staff**, and enter the same email and invite code.
 6. Create shifts, assign team members, and publish the roster. Staff can then see their own schedule, set availability, and request leave.
 
-For the classroom demo, choose **Admin** on the login screen and use `admin@smartshift.local` with `admin123`. This seeded account is for demonstration only; use private environment credentials before a public launch.
 
 Each manager has a separate cafe workspace. Staff accounts join one workspace through its invite code. A manager sees their own cafe’s team and roster; staff accounts receive their own shifts and leave information.
 

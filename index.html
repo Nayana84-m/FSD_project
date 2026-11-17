@@ -109,7 +109,6 @@
         <a href="#how-it-works" data-public-nav="true" class="nav-link">How It Works</a>
         <a href="#" data-role-nav="employee" data-target-view="employee" class="nav-link spa-nav-link">Staff Dashboard</a>
         <a href="#" data-role-nav="manager" data-target-view="manager" class="nav-link spa-nav-link">Manager Dashboard</a>
-        <a href="#" data-role-nav="admin" data-target-view="admin" class="nav-link spa-nav-link">Admin Panel</a>
       </nav>
 
       <div class="nav-actions">
@@ -129,7 +128,6 @@
       <a href="#" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
       <a href="#" data-role-nav="employee" data-target-view="employee" class="mobile-link spa-nav-link">Staff Dashboard</a>
       <a href="#" data-role-nav="manager" data-target-view="manager" class="mobile-link spa-nav-link">Manager Dashboard</a>
-      <a href="#" data-role-nav="admin" data-target-view="admin" class="mobile-link spa-nav-link">Admin Panel</a>
       <div class="mobile-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignupM">Sign up</button>
@@ -363,10 +361,6 @@
           <button type="button" class="auth-role-card" data-role="manager" aria-pressed="false">
             <span class="auth-role-icon">🛡️</span>
             <span><strong>Manager</strong><small>Build and publish rosters</small></span>
-          </button>
-          <button type="button" class="auth-role-card" data-role="admin" aria-pressed="false">
-            <span class="auth-role-icon">🧭</span>
-            <span><strong>Admin</strong><small>Oversee accounts and cafes</small></span>
           </button>
         </div>
 
@@ -638,27 +632,7 @@
   </div>
 
   <!-- ======================================================
-       VIEW 5: PLATFORM ADMIN
-       ====================================================== -->
-  <div id="view-admin" class="app-view">
-    <main class="admin-page container">
-      <div class="admin-hero"><div><span class="section-tag">Platform control centre</span><h1>SmartShift Admin Panel</h1><p>Monitor businesses, accounts, and roster activity from one place.</p></div><span class="admin-shield">🧭</span></div>
-      <div class="admin-stats-grid">
-        <div class="admin-stat-card"><span>BUSINESSES</span><strong id="adminWorkspaceCount">0</strong><small>Manager workspaces</small></div>
-        <div class="admin-stat-card"><span>MANAGERS</span><strong id="adminManagerCount">0</strong><small>Business owners</small></div>
-        <div class="admin-stat-card"><span>STAFF</span><strong id="adminStaffCount">0</strong><small>Team members</small></div>
-        <div class="admin-stat-card"><span>ACTIVE ACCOUNTS</span><strong id="adminActiveCount">0</strong><small>Ready to use</small></div>
-      </div>
-      <div class="admin-grid">
-        <section class="admin-card"><div class="admin-card-heading"><div><span class="section-tag">Account oversight</span><h2>Managers &amp; staff</h2></div><span class="admin-live-pill">● Live data</span></div><div id="adminUsersList" class="admin-users-list"></div></section>
-        <section class="admin-card"><div class="admin-card-heading"><div><span class="section-tag">Workspace health</span><h2>Business workspaces</h2></div></div><div id="adminWorkspacesList" class="admin-workspaces-list"></div></section>
-      </div>
-      <section class="admin-card admin-audit-card"><div class="admin-card-heading"><div><span class="section-tag">Traceability</span><h2>Recent activity</h2></div></div><div id="adminAuditList" class="admin-audit-list"></div></section>
-    </main>
-  </div>
-
-  <!-- ======================================================
-       VIEW 6: PROFILE
+       VIEW 5: PROFILE
        ====================================================== -->
   <div id="view-profile" class="app-view">
     <main class="profile-page container">
@@ -709,7 +683,6 @@
   <script src="js/validation.js"></script>
   <script src="js/employee.js"></script>
   <script src="js/manager.js"></script>
-  <script src="js/admin.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/app.js"></script>
   <script src="js/interactions.js"></script>
