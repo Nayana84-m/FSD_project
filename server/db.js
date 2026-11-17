@@ -32,8 +32,23 @@ function ensureWorkspaces(state) {
     changed = true;
   }
 
+  const admins = (state.users || []).filter(user => user.role === "admin");
   const managers = (state.users || []).filter(user => user.role === "manager");
-  const usedCodes = new Set(managers.map(user => user.joinCode).filter(Boolean));
+  const businessOwners = admins.length ? admins : managers;
+  const usedCodes = new Set([
+    ...(state.users || []).map(user => user.joinCode),
+    ...(state.users || []).map(user => user.managerJoinCode),
+    ...state.workspaces.map(w => w.joinCode),
+    ...state.workspaces.map(w => w.managerJoinCode)
+  ].filter(Boolean));
+
+  function generateCode() {
+    let code;
+    do { code = crypto.randomBytes(4).toString("hex").toUpperCase(); } while (usedCodes.has(code));
+    usedCodes.add(code);
+    return code;
+  }
+
   const template = {
     workers: state.workers || [],
     shifts: state.shifts || [],
@@ -42,9 +57,60 @@ function ensureWorkspaces(state) {
     publishedAt: state.publishedAt || null
   };
 
+  // Ensure workspaces for admins
+  for (const [adminIndex, admin] of admins.entries()) {
+    if (!admin.businessName) {
+      admin.businessName = defaultBusinessName(admin);
+      changed = true;
+    }
+    if (!admin.workspaceId) {
+      admin.workspaceId = admin.id;
+      changed = true;
+    }
+    if (!admin.joinCode) {
+      admin.joinCode = generateCode();
+      changed = true;
+    }
+    if (!admin.managerJoinCode) {
+      admin.managerJoinCode = generateCode();
+      changed = true;
+    }
+    let workspace = state.workspaces.find(item => item.id === admin.workspaceId || item.adminId === admin.id);
+    if (!workspace) {
+      workspace = {
+        id: admin.workspaceId,
+        adminId: admin.id,
+        managerId: managers[0]?.id || null,
+        businessName: admin.businessName,
+        joinCode: admin.joinCode,
+        managerJoinCode: admin.managerJoinCode,
+        businessSettings: { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" },
+        ...(adminIndex === 0
+          ? structuredClone(template)
+          : { workers: [], shifts: [], leaveRequests: [], rosterStatus: "draft", publishedAt: null })
+      };
+      state.workspaces.push(workspace);
+      changed = true;
+    } else {
+      workspace.id = admin.workspaceId;
+      workspace.adminId = admin.id;
+      workspace.businessName = admin.businessName;
+      workspace.joinCode = admin.joinCode;
+      workspace.managerJoinCode ||= admin.managerJoinCode;
+      workspace.businessSettings ||= { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" };
+    }
+  }
+
+  const primaryWorkspaceId = admins[0]?.workspaceId || managers[0]?.workspaceId;
+
+  // Ensure workspaces for managers
   for (const [managerIndex, manager] of managers.entries()) {
+    if (admins.length && !manager.workspaceId) {
+      manager.workspaceId = primaryWorkspaceId;
+      changed = true;
+    }
     if (!manager.businessName) {
-      manager.businessName = defaultBusinessName(manager);
+      manager.businessName = admins.length ? (state.workspaces.find(w => w.id === manager.workspaceId)?.businessName || defaultBusinessName(manager)) : defaultBusinessName(manager);
       changed = true;
     }
     if (!manager.workspaceId) {
@@ -52,30 +118,33 @@ function ensureWorkspaces(state) {
       changed = true;
     }
     if (!manager.joinCode) {
-      let code;
-      do { code = crypto.randomBytes(4).toString("hex").toUpperCase(); } while (usedCodes.has(code));
-      manager.joinCode = code;
-      usedCodes.add(code);
+      manager.joinCode = generateCode();
+      changed = true;
+    }
+    if (!manager.managerJoinCode) {
+      manager.managerJoinCode = generateCode();
       changed = true;
     }
     let workspace = state.workspaces.find(item => item.id === manager.workspaceId || item.managerId === manager.id);
     if (!workspace) {
       workspace = {
         id: manager.workspaceId,
+        adminId: null,
         managerId: manager.id,
         businessName: manager.businessName,
         joinCode: manager.joinCode,
-        ...(managerIndex === 0
+        managerJoinCode: manager.managerJoinCode,
+        businessSettings: { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" },
+        ...(managerIndex === 0 && !admins.length
           ? structuredClone(template)
           : { workers: [], shifts: [], leaveRequests: [], rosterStatus: "draft", publishedAt: null })
       };
       state.workspaces.push(workspace);
       changed = true;
     } else {
-      workspace.id = manager.workspaceId;
-      workspace.managerId = manager.id;
-      workspace.businessName = manager.businessName;
-      workspace.joinCode = manager.joinCode;
+      if (!workspace.managerId) workspace.managerId = manager.id;
+      if (!workspace.managerJoinCode) { workspace.managerJoinCode = manager.managerJoinCode; changed = true; }
+      workspace.businessSettings ||= { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" };
     }
   }
 
@@ -85,6 +154,8 @@ function ensureWorkspaces(state) {
     workspace.leaveRequests ||= [];
     workspace.rosterStatus ||= "draft";
     workspace.publishedAt ||= null;
+    workspace.managerJoinCode ||= generateCode();
+    workspace.businessSettings ||= { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" };
     for (const worker of workspace.workers) {
       if (!Array.isArray(worker.certifications)) { worker.certifications = []; changed = true; }
       if (!worker.availability || typeof worker.availability !== "object") { worker.availability = {}; changed = true; }
@@ -94,7 +165,7 @@ function ensureWorkspaces(state) {
     }
   }
 
-  const defaultWorkspaceId = managers[0]?.workspaceId;
+  const defaultWorkspaceId = primaryWorkspaceId;
   for (const employee of (state.users || []).filter(user => user.role === "employee")) {
     if (!employee.workspaceId && defaultWorkspaceId) {
       employee.workspaceId = defaultWorkspaceId;

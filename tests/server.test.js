@@ -98,4 +98,55 @@ test("signup, workspace isolation, assignment, and staff-only roster access work
 
   const wrongRoleLogin = await api("/api/auth/login", { method: "POST", body: { email: "ari@example.test", password: "secure-pass-456", role: "manager" } });
   assert.equal(wrongRoleLogin.status, 401);
+
+  // Admin (Cafe Administrator / Owner) testing
+  const adminSignup = await api("/api/auth/signup", { method: "POST", body: {
+    name: "Elena Vance", email: "elena.admin@example.test", password: "secure-admin-123", role: "admin", businessName: "Seaside Roasters"
+  } });
+  assert.equal(adminSignup.status, 201);
+  const adminToken = adminSignup.payload.data.token;
+  const adminWorkspaceId = adminSignup.payload.data.user.workspaceId;
+  assert.equal(adminSignup.payload.data.user.role, "admin");
+  assert.ok(adminSignup.payload.data.user.joinCode, "admin must receive staff join code");
+  assert.ok(adminSignup.payload.data.user.managerJoinCode, "admin must receive manager join code");
+
+  // Non-admins must be blocked from admin overview
+  const forbiddenOverview = await api("/api/admin/overview", { token: managerToken });
+  assert.equal(forbiddenOverview.status, 403);
+
+  // Admin accesses cafe overview
+  const adminOverview = await api("/api/admin/overview", { token: adminToken });
+  assert.equal(adminOverview.status, 200);
+  assert.equal(adminOverview.payload.data.cafe.businessName, "Seaside Roasters");
+
+  // Admin directly creates a manager for this cafe
+  const addManager = await api("/api/admin/managers", { token: adminToken, method: "POST", body: {
+    name: "Sub Manager", email: "sub.manager@example.test", password: "sub-manager-pass-123"
+  } });
+  assert.equal(addManager.status, 201);
+  assert.equal(addManager.payload.data.manager.role, "manager");
+
+  // Store manager can also join this cafe using admin's manager invite code
+  const invitedManager = await api("/api/auth/signup", { method: "POST", body: {
+    name: "Invited Shift Lead", email: "invited.lead@example.test", password: "lead-secure-456", role: "manager", joinCode: adminSignup.payload.data.user.managerJoinCode
+  } });
+  assert.equal(invitedManager.status, 201);
+  assert.equal(invitedManager.payload.data.user.workspaceId, adminWorkspaceId);
+
+  // Admin updates cafe business settings and policies
+  const updateSettings = await api("/api/admin/settings", { token: adminToken, method: "PUT", body: {
+    businessName: "Seaside Roasters & Bakery", maxWeeklyHoursDefault: 30, defaultHourlyRate: 280
+  } });
+  assert.equal(updateSettings.status, 200);
+  assert.equal(updateSettings.payload.data.businessName, "Seaside Roasters & Bakery");
+
+  // Admin regenerates invite codes
+  const regenCode = await api("/api/admin/codes/regenerate", { token: adminToken, method: "POST", body: { type: "staff" } });
+  assert.equal(regenCode.status, 200);
+  assert.ok(regenCode.payload.data.code);
+
+  // Admin can modify personnel roles
+  const promoteUser = await api(`/api/admin/users/${addManager.payload.data.manager.id}/role`, { token: adminToken, method: "PUT", body: { role: "employee" } });
+  assert.equal(promoteUser.status, 200);
+  assert.equal(promoteUser.payload.data.role, "employee");
 });

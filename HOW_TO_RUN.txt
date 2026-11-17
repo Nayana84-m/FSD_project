@@ -39,15 +39,18 @@ Atlas mode prints:
 
 If MONGODB_URI is unset, the app starts in local JSON demo mode instead.
 
-First-use account flow
-----------------------
-1. Select Manager and create an account with the cafe/business name.
-2. Open the manager Profile and share its staff invite code with the team.
-3. Add staff in the manager dashboard using their email and job details.
-4. Staff select Staff > Create account and enter the matching email and invite
-   code. This links the account to the manager's cafe and staff record.
-5. Create shifts, assign suitable staff, and publish the roster. Staff can view
-   their confirmed shifts and submit leave requests.
+First-use account flow & quick demo credentials
+------------------------------------------------
+Pre-configured test accounts:
+- Cafe Admin:  admin@smartshift.local   / admin123
+- Store Manager: manager@smartshift.local / manager123
+- Staff Member:  alex.rivera@smartshift.com / employee123
+
+1. Log in as Cafe Admin to manage store managers, staff members, cafe operating
+   policies, and invite codes.
+2. Store Managers build weekly shifts, perform conflict-free assignments with
+   skill/availability/overtime validation, and publish the roster.
+3. Staff members log in to set availability, request leave, and view confirmed shifts.
 
 View saved Atlas data
 ---------------------

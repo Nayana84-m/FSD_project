@@ -94,19 +94,21 @@ function validateAssignment(worker, shift) {
 
 function publicUser(user, db) {
   const result = { id: user.id, name: user.name, email: user.email, role: user.role, workspaceId: user.workspaceId || "" };
+  const ws = findUserWorkspace(db, user);
   if (user.role === "employee") {
     result.workerId = user.workerId || user.id;
-    result.businessName = findUserWorkspace(db, user)?.businessName || "";
+    result.businessName = ws?.businessName || "";
   }
-  if (user.role === "manager") {
-    result.businessName = user.businessName || `${user.name}'s Cafe`;
-    result.joinCode = user.joinCode || "";
+  if (user.role === "manager" || user.role === "admin") {
+    result.businessName = user.businessName || ws?.businessName || `${user.name}'s Cafe`;
+    result.joinCode = ws?.joinCode || user.joinCode || "";
+    result.managerJoinCode = ws?.managerJoinCode || user.managerJoinCode || "";
   }
   return result;
 }
 
 function findUserWorkspace(db, user) {
-  return db.workspaces?.find(item => item.id === user.workspaceId || item.managerId === user.id);
+  return db.workspaces?.find(item => item.id === user.workspaceId || item.managerId === user.id || item.adminId === user.id);
 }
 
 function targetWorkspaceWorker(db, user) {
@@ -115,18 +117,28 @@ function targetWorkspaceWorker(db, user) {
 }
 
 function makeInviteCode(db) {
-  const usedCodes = new Set((db.users || []).map(user => user.joinCode).filter(Boolean));
+  const usedCodes = new Set([
+    ...(db.users || []).map(user => user.joinCode),
+    ...(db.users || []).map(user => user.managerJoinCode),
+    ...(db.workspaces || []).map(w => w.joinCode),
+    ...(db.workspaces || []).map(w => w.managerJoinCode)
+  ].filter(Boolean));
   let code;
   do { code = crypto.randomBytes(4).toString("hex").toUpperCase(); } while (usedCodes.has(code));
   return code;
 }
 
-function cloneWorkspaceData(db, manager) {
+function cloneWorkspaceData(db, creator) {
+  const joinCode = creator.joinCode || makeInviteCode(db);
+  const managerJoinCode = creator.managerJoinCode || makeInviteCode(db);
   return {
-    id: manager.workspaceId,
-    managerId: manager.id,
-    businessName: manager.businessName,
-    joinCode: manager.joinCode,
+    id: creator.workspaceId,
+    adminId: creator.role === "admin" ? creator.id : null,
+    managerId: creator.role === "manager" ? creator.id : null,
+    businessName: creator.businessName,
+    joinCode,
+    managerJoinCode,
+    businessSettings: { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" },
     workers: [],
     shifts: [],
     leaveRequests: [],
@@ -164,22 +176,44 @@ async function handle(request, response) {
     const name = String(body.name || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
-    if (!name || !email || !password || !["employee", "manager"].includes(body.role)) return sendJson(response, 400, { error: "Name, email, password, and role are required." });
+    if (!name || !email || !password || !["employee", "manager", "admin"].includes(body.role)) return sendJson(response, 400, { error: "Name, email, password, and role are required." });
     if (name.length > 100 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return sendJson(response, 400, { error: "Enter a valid name and email address." });
-    if (body.role === "manager" && !String(body.businessName || "").trim()) return sendJson(response, 400, { error: "Enter your cafe or business name." });
-    if (body.role === "employee" && !String(body.joinCode || "").trim()) return sendJson(response, 400, { error: "Enter the invite code from your manager." });
+    if (body.role === "admin" && !String(body.businessName || "").trim()) return sendJson(response, 400, { error: "Enter your cafe or business name." });
+    if (body.role === "manager" && !String(body.businessName || "").trim() && !String(body.joinCode || "").trim()) return sendJson(response, 400, { error: "Enter your cafe name or manager invite code." });
+    if (body.role === "employee" && !String(body.joinCode || "").trim()) return sendJson(response, 400, { error: "Enter the invite code from your cafe." });
     if (password.length < 8) return sendJson(response, 400, { error: "Password must be at least 8 characters." });
     if (db.users.some(item => item.email.toLowerCase() === email)) return sendJson(response, 409, { error: "An account with this email already exists." });
     const user = { id: `${body.role}-${crypto.randomUUID()}`, name, email, role: body.role, password };
-    if (body.role === "manager") {
+    
+    let isCreatingWorkspace = false;
+    if (body.role === "admin") {
       user.businessName = String(body.businessName).trim();
       user.workspaceId = user.id;
       user.joinCode = makeInviteCode(db);
+      user.managerJoinCode = makeInviteCode(db);
+      isCreatingWorkspace = true;
+    } else if (body.role === "manager") {
+      const code = String(body.joinCode || "").trim().toUpperCase();
+      const targetWorkspace = code && (db.workspaces || []).find(w => w.managerJoinCode === code || w.joinCode === code);
+      if (code && !targetWorkspace) {
+        return sendJson(response, 400, { error: "That manager invite code was not recognized. Ask your cafe admin." });
+      }
+      if (targetWorkspace) {
+        user.workspaceId = targetWorkspace.id;
+        user.businessName = targetWorkspace.businessName;
+      } else {
+        user.businessName = String(body.businessName).trim();
+        user.workspaceId = user.id;
+        user.joinCode = makeInviteCode(db);
+        user.managerJoinCode = makeInviteCode(db);
+        isCreatingWorkspace = true;
+      }
     } else {
-      const manager = db.users.find(item => item.role === "manager" && item.joinCode === String(body.joinCode || "").trim().toUpperCase());
-      if (!manager) return sendJson(response, 400, { error: "That invite code was not recognized. Ask your manager for the current code." });
-      user.workspaceId = manager.workspaceId;
-      const targetWorkspace = findUserWorkspace(db, manager);
+      const code = String(body.joinCode || "").trim().toUpperCase();
+      const targetWorkspace = (db.workspaces || []).find(w => w.joinCode === code) ||
+        findUserWorkspace(db, db.users.find(item => item.joinCode === code));
+      if (!targetWorkspace) return sendJson(response, 400, { error: "That invite code was not recognized. Ask your cafe manager or admin for the current code." });
+      user.workspaceId = targetWorkspace.id;
       const email = user.email;
       const invitedWorker = targetWorkspace?.workers.find(worker => String(worker.email || "").trim().toLowerCase() === email && !worker.userId);
       user.workerId = invitedWorker?.id || user.id;
@@ -187,10 +221,10 @@ async function handle(request, response) {
     }
     await secureUserPassword(user);
     db.users.push(user);
-    if (body.role === "manager") {
+    if (isCreatingWorkspace) {
       db.workspaces ||= [];
       db.workspaces.push(cloneWorkspaceData(db, user));
-    } else {
+    } else if (body.role === "employee") {
       const worker = targetWorkspaceWorker(db, user) || { id: user.workerId || user.id, name: user.name, role: "Staff member", certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} };
       worker.userId = user.id;
       worker.name = user.name;
@@ -215,7 +249,17 @@ async function handle(request, response) {
 
   if (request.method === "GET" && url.pathname === "/api/workspace") {
     if (!workspace) return sendJson(response, 404, { error: "Your cafe workspace was not found." });
-    if (session.role === "manager") return sendJson(response, 200, { data: { workspace } });
+    if (["admin", "manager"].includes(session.role)) {
+      const managers = (db.users || []).filter(u => (u.workspaceId === workspace.id || workspace.managerId === u.id) && u.role === "manager").map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role }));
+      const admin = (db.users || []).find(u => (u.workspaceId === workspace.id || workspace.adminId === u.id) && u.role === "admin");
+      return sendJson(response, 200, { data: { workspace: {
+        ...workspace,
+        managers,
+        admin: admin ? { id: admin.id, name: admin.name, email: admin.email, role: admin.role } : null,
+        staffJoinCode: workspace.joinCode,
+        managerJoinCode: workspace.managerJoinCode
+      } } });
+    }
     return sendJson(response, 200, { data: { workspace: {
       id: workspace.id,
       businessName: workspace.businessName,
@@ -229,18 +273,18 @@ async function handle(request, response) {
 
   if (request.method === "GET" && url.pathname === "/api/workers") {
     if (!workspace) return sendJson(response, 404, { error: "Your cafe workspace was not found." });
-    const workers = session.role === "manager" ? workspace.workers : workspace.workers.filter(worker => worker.userId === session.userId || worker.id === session.workerId);
+    const workers = ["admin", "manager"].includes(session.role) ? workspace.workers : workspace.workers.filter(worker => worker.userId === session.userId || worker.id === session.workerId);
     return sendJson(response, 200, { data: workers });
   }
 
   if (request.method === "GET" && url.pathname === "/api/shifts") {
     if (!workspace) return sendJson(response, 404, { error: "Your cafe workspace was not found." });
-    const shifts = session.role === "manager" ? workspace.shifts : workspace.rosterStatus === "published" ? workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId) : [];
+    const shifts = ["admin", "manager"].includes(session.role) ? workspace.shifts : workspace.rosterStatus === "published" ? workspace.shifts.filter(shift => shift.assignedWorkerId === session.workerId) : [];
     return sendJson(response, 200, { data: shifts });
   }
 
   if (request.method === "PUT" && url.pathname === "/api/workspace") {
-    if (session.role !== "manager" || !workspace) return sendJson(response, 403, { error: "Only a manager can update this cafe workspace." });
+    if (!["admin", "manager"].includes(session.role) || !workspace) return sendJson(response, 403, { error: "Only an admin or manager can update this cafe workspace." });
     const body = await readBody(request);
     if (!Array.isArray(body.workers) || !Array.isArray(body.shifts)) return sendJson(response, 400, { error: "Workspace data is incomplete." });
     const currentWorkers = new Map(workspace.workers.map(worker => [worker.id, worker]));
@@ -306,7 +350,7 @@ async function handle(request, response) {
   }
 
   if (request.method === "PUT" && parts[0] === "api" && parts[1] === "leave-requests" && parts.length === 3) {
-    if (session.role !== "manager" || !workspace) return sendJson(response, 403, { error: "Only this cafe's manager can review leave." });
+    if (!["admin", "manager"].includes(session.role) || !workspace) return sendJson(response, 403, { error: "Only this cafe's manager or admin can review leave." });
     const body = await readBody(request);
     if (!["approved", "rejected"].includes(body.status)) return sendJson(response, 400, { error: "Choose approve or reject." });
     const leaveRequest = workspace.leaveRequests.find(item => item.id === parts[2]);
@@ -333,11 +377,11 @@ async function handle(request, response) {
     const email = String(body.email || "").trim().toLowerCase();
     if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return sendJson(response, 400, { error: "Enter a valid name and email address." });
     if (db.users.some(item => item.id !== user.id && item.email.toLowerCase() === email)) return sendJson(response, 409, { error: "An account with this email already exists." });
-    const businessName = user.role === "manager" ? String(body.businessName || "").trim() : "";
-    if (user.role === "manager" && !businessName) return sendJson(response, 400, { error: "Enter your cafe or business name." });
+    const businessName = ["admin", "manager"].includes(user.role) ? String(body.businessName || "").trim() : "";
+    if (["admin", "manager"].includes(user.role) && !businessName) return sendJson(response, 400, { error: "Enter your cafe or business name." });
     user.name = name;
     user.email = email;
-    if (user.role === "manager") {
+    if (["admin", "manager"].includes(user.role)) {
       user.businessName = businessName;
       if (workspace) workspace.businessName = businessName;
     } else {
@@ -377,7 +421,7 @@ async function handle(request, response) {
   }
 
   if (request.method === "POST" && parts[0] === "api" && parts[1] === "shifts" && parts[3] === "assign") {
-    if (session.role !== "manager") return sendJson(response, 403, { error: "Only managers can assign shifts." });
+    if (!["admin", "manager"].includes(session.role)) return sendJson(response, 403, { error: "Only managers and admins can assign shifts." });
     const shift = workspace?.shifts.find(item => item.id === parts[2]);
     const body = await readBody(request);
     const worker = workspace?.workers.find(item => item.id === body.workerId);
@@ -392,6 +436,174 @@ async function handle(request, response) {
     db.auditLog.push({ action: "shift.assigned", shiftId: shift.id, workerId: worker.id, at: new Date().toISOString() });
     await writeDb(db);
     return sendJson(response, 200, { data: shift });
+  }
+
+  // ADMIN-SPECIFIC REST ROUTES (Cafe / Business Administration)
+  if (request.method === "GET" && url.pathname === "/api/admin/overview") {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can access the administration overview." });
+    const managers = (db.users || []).filter(u => (u.workspaceId === workspace.id || workspace.managerId === u.id) && u.role === "manager").map(u => ({
+      id: u.id, name: u.name, email: u.email, role: u.role
+    }));
+    const totalScheduledHours = workspace.shifts.filter(s => s.assignedWorkerId).reduce((sum, s) => sum + Number(s.duration || 0), 0);
+    const estimatedPayroll = workspace.shifts.filter(s => s.assignedWorkerId).reduce((sum, s) => {
+      const worker = workspace.workers.find(w => w.id === s.assignedWorkerId);
+      return sum + Number(s.duration || 0) * Number(worker?.hourlyRate || 200);
+    }, 0);
+
+    return sendJson(response, 200, {
+      data: {
+        cafe: {
+          id: workspace.id,
+          businessName: workspace.businessName,
+          staffJoinCode: workspace.joinCode,
+          managerJoinCode: workspace.managerJoinCode,
+          businessSettings: workspace.businessSettings || { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" }
+        },
+        stats: {
+          totalStaff: workspace.workers.length,
+          totalManagers: managers.length,
+          totalShifts: workspace.shifts.length,
+          assignedShifts: workspace.shifts.filter(s => s.assignedWorkerId).length,
+          scheduledHours: totalScheduledHours,
+          estimatedPayroll,
+          pendingLeaves: workspace.leaveRequests.filter(l => l.status === "pending").length,
+          rosterStatus: workspace.rosterStatus
+        },
+        managers,
+        staff: workspace.workers,
+        recentActivity: (db.auditLog || []).filter(log => log.workspaceId === workspace.id || log.userId === session.userId).slice(-20).reverse()
+      }
+    });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/admin/managers") {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can add managers." });
+    const body = await readBody(request);
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim().toLowerCase();
+    const password = String(body.password || "");
+    if (!name || !email || !password) return sendJson(response, 400, { error: "Name, email, and password are required." });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return sendJson(response, 400, { error: "Enter a valid email address." });
+    if (password.length < 8) return sendJson(response, 400, { error: "Password must be at least 8 characters." });
+    if (db.users.some(item => item.email.toLowerCase() === email)) return sendJson(response, 409, { error: "An account with this email already exists." });
+    const newManager = {
+      id: `manager-${crypto.randomUUID()}`,
+      name,
+      email,
+      role: "manager",
+      password,
+      workspaceId: workspace.id,
+      businessName: workspace.businessName
+    };
+    await secureUserPassword(newManager);
+    db.users.push(newManager);
+    if (!workspace.managerId) workspace.managerId = newManager.id;
+    db.auditLog.push({ action: "admin.manager_created", managerId: newManager.id, adminId: session.userId, workspaceId: workspace.id, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 201, { data: { manager: publicUser(newManager, db) } });
+  }
+
+  if (request.method === "PUT" && parts[0] === "api" && parts[1] === "admin" && parts[2] === "users" && parts.length === 5 && parts[4] === "role") {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can change personnel roles." });
+    const targetUserId = parts[3];
+    if (targetUserId === session.userId) return sendJson(response, 400, { error: "You cannot change your own admin role." });
+    const body = await readBody(request);
+    const newRole = String(body.role || "").trim().toLowerCase();
+    if (!["manager", "employee"].includes(newRole)) return sendJson(response, 400, { error: "Role must be manager or employee." });
+
+    let targetUser = db.users.find(u => u.id === targetUserId && (u.workspaceId === workspace.id || u.id === workspace.managerId));
+    let targetWorker = workspace.workers.find(w => w.userId === targetUserId || w.id === targetUserId);
+
+    if (!targetUser && !targetWorker) return sendJson(response, 404, { error: "User not found in this cafe." });
+
+    if (targetUser) targetUser.role = newRole;
+
+    if (newRole === "employee" && !targetWorker && targetUser) {
+      targetWorker = {
+        id: targetUser.id,
+        userId: targetUser.id,
+        name: targetUser.name,
+        email: targetUser.email,
+        role: "Staff member",
+        certifications: ["Barista"],
+        maxWeeklyHours: workspace.businessSettings?.maxWeeklyHoursDefault || 25,
+        currentAssignedHours: 0,
+        hourlyRate: workspace.businessSettings?.defaultHourlyRate || 200,
+        availability: {}
+      };
+      workspace.workers.push(targetWorker);
+    } else if (newRole === "manager" && targetWorker) {
+      targetWorker.role = "Store Manager";
+    }
+
+    db.auditLog.push({ action: "admin.role_changed", targetUserId, newRole, adminId: session.userId, workspaceId: workspace.id, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 200, { data: { success: true, role: newRole } });
+  }
+
+  if (request.method === "DELETE" && parts[0] === "api" && parts[1] === "admin" && parts[2] === "users" && parts.length === 4) {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can remove personnel." });
+    const targetUserId = parts[3];
+    if (targetUserId === session.userId) return sendJson(response, 400, { error: "You cannot remove yourself from your cafe." });
+
+    const userIndex = db.users.findIndex(u => u.id === targetUserId && (u.workspaceId === workspace.id || u.id === workspace.managerId));
+    if (userIndex >= 0) db.users.splice(userIndex, 1);
+
+    const workerIndex = workspace.workers.findIndex(w => w.id === targetUserId || w.userId === targetUserId);
+    if (workerIndex >= 0) {
+      const removedWorker = workspace.workers[workerIndex];
+      workspace.workers.splice(workerIndex, 1);
+      for (const shift of workspace.shifts) {
+        if (shift.assignedWorkerId === removedWorker.id) shift.assignedWorkerId = null;
+      }
+    }
+
+    if (workspace.managerId === targetUserId) {
+      const remainingManager = db.users.find(u => u.workspaceId === workspace.id && u.role === "manager");
+      workspace.managerId = remainingManager?.id || null;
+    }
+
+    db.auditLog.push({ action: "admin.user_removed", targetUserId, adminId: session.userId, workspaceId: workspace.id, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 200, { data: { deleted: true } });
+  }
+
+  if (request.method === "PUT" && url.pathname === "/api/admin/settings") {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can update cafe settings." });
+    const body = await readBody(request);
+    if (body.businessName && String(body.businessName).trim()) {
+      workspace.businessName = String(body.businessName).trim();
+      const adminUser = db.users.find(u => u.id === session.userId);
+      if (adminUser) adminUser.businessName = workspace.businessName;
+    }
+    workspace.businessSettings ||= {};
+    if (Number.isFinite(Number(body.maxWeeklyHoursDefault)) && Number(body.maxWeeklyHoursDefault) >= 1 && Number(body.maxWeeklyHoursDefault) <= 60) {
+      workspace.businessSettings.maxWeeklyHoursDefault = Number(body.maxWeeklyHoursDefault);
+    }
+    if (Number.isFinite(Number(body.defaultHourlyRate)) && Number(body.defaultHourlyRate) >= 1) {
+      workspace.businessSettings.defaultHourlyRate = Number(body.defaultHourlyRate);
+    }
+    if (typeof body.businessPhone === "string") workspace.businessSettings.businessPhone = body.businessPhone.trim();
+    if (typeof body.businessAddress === "string") workspace.businessSettings.businessAddress = body.businessAddress.trim();
+
+    db.auditLog.push({ action: "admin.settings_updated", adminId: session.userId, workspaceId: workspace.id, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 200, { data: { settings: workspace.businessSettings, businessName: workspace.businessName } });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/admin/codes/regenerate") {
+    if (session.role !== "admin" || !workspace) return sendJson(response, 403, { error: "Only a cafe admin can regenerate invite codes." });
+    const body = await readBody(request);
+    const type = body.type === "manager" ? "manager" : "staff";
+    const newCode = makeInviteCode(db);
+    if (type === "manager") {
+      workspace.managerJoinCode = newCode;
+    } else {
+      workspace.joinCode = newCode;
+    }
+    db.auditLog.push({ action: `admin.code_regenerated.${type}`, code: newCode, adminId: session.userId, workspaceId: workspace.id, at: new Date().toISOString() });
+    await writeDb(db);
+    return sendJson(response, 200, { data: { type, code: newCode } });
   }
 
   return sendJson(response, 404, { error: "Route not found." });

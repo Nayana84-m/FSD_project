@@ -23,28 +23,32 @@ Small businesses and restaurants often plan shifts in spreadsheets and messages.
 
 ## ✨ What you can do
 
-| For managers 🧑‍🍳 | For staff 🌿 |
-| --- | --- |
-| Create an account for a named cafe or business | Join the right cafe with a manager’s invite code |
-| Add team members, skills, weekly hour limits, and pay | Set weekly availability and preferred time blocks |
-| Create shifts with a chosen day and start/end time | See only your own assigned shifts |
-| Assign staff with skill, availability, and hour checks | Submit leave requests and check their status |
-| Review and respond to leave requests | Update your profile details |
-| Publish the weekly roster for the team | See workspace changes refresh about every 4 seconds |
+| For Cafe Admins / Owners 👑 | For Store Managers 🛡️ | For Staff 🌿 |
+| --- | --- | --- |
+| Create and administer the cafe / restaurant workspace | Plan weekly shifts and specify required roles | Join the cafe with the staff invite code |
+| Appoint and oversee both managers and staff | Smart validation: skills, availability, and weekly hours | Set weekly availability and preferred time blocks |
+| Set cafe operating policies (max hours cap, base rates) | Review and respond to leave requests | See only your own confirmed shifts |
+| Manage separate Staff & Manager invite codes | Publish the weekly roster for the team | Submit leave requests and track leave balance |
+| Track estimated payroll costs and cafe activity trail | Open the shift assignment matrix | Update profile details and skills |
 
-### Business owner administration
+### Cafe & Business Owner Administration
 
-Every cafe, restaurant, or small business gets its own separate manager workspace. The manager who creates the business account acts as that business’s administrator: they manage their own staff, shifts, leave requests, invite code, and roster. Staff can only access the workspace they join through that business’s invite code.
+Every cafe, restaurant, or small business gets its own separate workspace with multi-tier role-based access:
+- **Admin (Cafe Owner / Business Administrator):** Holds executive authority over that specific cafe. The admin oversees both managers and staff, configures cafe policies, sets invite codes, monitors payroll estimates, and has full supervisory access to shift rosters.
+- **Manager (Shift Supervisor / Store Planner):** Coordinates day-to-day operations: creating shifts, assigning workers via the Smart Validation Engine, reviewing time-off requests, and publishing the weekly roster.
+- **Staff (Employees / Team Members):** Submits availability, views assigned shifts, and requests leave.
 
-### A small, friendly flow
+### A clear, friendly flow
 
 ```mermaid
-flowchart LR
-  A[Manager creates a cafe] --> B[Adds team and shifts]
-  B --> C[SmartShift checks each assignment]
-  C --> D[Manager publishes roster]
-  E[Staff joins with invite code] --> F[Shares availability and requests leave]
-  D --> G[Staff sees their own schedule]
+flowchart TD
+  A[Admin creates cafe workspace] --> B[Appoints managers & sets cafe policies]
+  A --> C[Generates staff & manager invite codes]
+  B --> D[Manager builds shifts on roster]
+  E[Staff joins with staff code] --> F[Submits weekly availability & leaves]
+  D --> G[SmartShift validates skills, availability & hours]
+  G --> H[Manager/Admin publishes roster]
+  H --> I[Staff sees confirmed personal schedule]
 ```
 
 ## 🚀 Run it on your computer
@@ -93,17 +97,22 @@ To create a separate copy, choose **New → Blueprint** in Render, connect this 
 
 Render’s free web services sleep after 15 minutes without traffic and may take about a minute to wake. Their local files are temporary, so keep `MONGODB_URI` configured to use Atlas for persistent app data. See [Render’s free service limits](https://render.com/docs/free) and [outbound IP guide](https://render.com/docs/outbound-ip-addresses).
 
-## 🪄 First time through
+## 🪄 Quick demo accounts & first time through
 
-1. Start on the public home page, then choose **Sign up** in the header or **Get started** on the page.
-2. Choose **Manager** and create an account with the cafe name.
-3. In the Manager Profile, copy the staff invite code.
-4. Add staff from the manager dashboard. Add their email and skills so assignments can be checked.
-5. Give the invite code to your team. Staff choose **Sign up**, select **Staff**, and enter the same email and invite code.
-6. Create shifts, assign team members, and publish the roster. Staff can then see their own schedule, set availability, and request leave.
+SmartShift comes with pre-configured demo credentials for all three cafe tiers:
 
+| Role | Email | Password | What to try |
+| --- | --- | --- | --- |
+| **Cafe Admin 👑** | `admin@smartshift.local` | `admin123` | View total payroll, invite/appoint managers, set cafe operating policies, oversee team |
+| **Store Manager 🛡️** | `manager@smartshift.local` | `manager123` | Build shifts, assign team members with smart checks, review leave requests, publish roster |
+| **Staff Member 👨‍🍳** | `alex.rivera@smartshift.com` | `employee123` | Check confirmed shifts, cycle availability (Available / Preferred / Unavailable), request leave |
 
-Each manager has a separate cafe workspace. Staff accounts join one workspace through its invite code. A manager sees their own cafe’s team and roster; staff accounts receive their own shifts and leave information.
+### Step-by-step first walk-through:
+
+1. **Admin Setup**: Log in as **Admin** (or sign up choosing Admin). Review the Cafe Administration Console, see the Staff Invite Code and Manager Invite Code, and appoint store managers.
+2. **Manager Flow**: Log in as **Manager**. Create shifts, assign team members (SmartShift validates certification, availability, and weekly hours in real-time), and publish the weekly roster.
+3. **Staff Flow**: Log in as **Staff**. Set weekly availability, submit a time-off request, and view your assigned schedule.
+4. **Supervisory Oversight**: Log back into Admin to see live estimated payroll analytics and the complete audit trail.
 
 ## 🗂️ Where the data lives
 

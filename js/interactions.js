@@ -7,17 +7,21 @@
 
 // SPA View Switcher
 function switchView(targetView, scrollToSectionId = null) {
-  const views = ['landing', 'login', 'employee', 'manager', 'profile'];
+  const views = ['landing', 'login', 'employee', 'manager', 'profile', 'admin'];
   const session = window.SmartShiftAuth?.getSession();
 
-  const wrongRole = (targetView === 'employee' || targetView === 'manager') && session && session.role !== targetView;
+  let wrongRole = false;
+  if (targetView === 'employee' && session && session.role !== 'employee') wrongRole = true;
+  if (targetView === 'manager' && session && !['manager', 'admin'].includes(session.role)) wrongRole = true;
+  if (targetView === 'admin' && session && session.role !== 'admin') wrongRole = true;
+
   if (wrongRole) {
     window.SmartShiftAuth.clearSession();
     window.localStorage.removeItem('smartshift-token');
     updateAuthNav();
-    setLoginRole(targetView);
+    setLoginRole(targetView === 'admin' ? 'admin' : targetView);
     targetView = 'login';
-  } else if ((targetView === 'employee' || targetView === 'manager') && !session) {
+  } else if ((targetView === 'employee' || targetView === 'manager' || targetView === 'admin') && !session) {
     setLoginRole(targetView);
     targetView = 'login';
   } else if (targetView === 'profile' && !session) {
@@ -73,6 +77,8 @@ function switchView(targetView, scrollToSectionId = null) {
     if (typeof window.initAssignModal === 'function') window.initAssignModal();
     if (typeof window.initFilterPills === 'function') window.initFilterPills();
     if (typeof window.initPublishButton === 'function') window.initPublishButton();
+  } else if (targetView === 'admin' && typeof window.initAdminDashboard === 'function') {
+    window.initAdminDashboard();
   } else if (targetView === 'profile') {
     renderProfile();
   }
@@ -89,10 +95,18 @@ function setLoginRole(role) {
   });
   const email = document.getElementById('email');
   const password = document.getElementById('password');
-  if (email) email.value = role === 'manager' ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
-  if (password) password.value = role === 'manager' ? 'manager123' : 'employee123';
+  if (email) {
+    email.value = role === 'admin' ? 'admin@smartshift.local' : role === 'manager' ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
+  }
+  if (password) {
+    password.value = role === 'admin' ? 'admin123' : role === 'manager' ? 'manager123' : 'employee123';
+  }
   const helper = document.getElementById('authHelper');
-  if (helper) helper.textContent = `Welcome back. Log in to continue to your ${role === 'manager' ? 'manager' : 'staff'} workspace.`;
+  if (helper) {
+    helper.textContent = role === 'admin'
+      ? 'Welcome back. Log in to your cafe administration console.'
+      : `Welcome back. Log in to continue to your ${role === 'manager' ? 'manager' : 'staff'} workspace.`;
+  }
 }
 
 // Global Toast Notification Helper
@@ -129,7 +143,15 @@ function updateAuthNav() {
   if (mobileSignupButton) mobileSignupButton.hidden = Boolean(session);
   document.body.classList.toggle('workspace-mode', Boolean(session));
   document.querySelectorAll('[data-public-nav="true"]').forEach(link => { link.hidden = Boolean(session); });
-  document.querySelectorAll('[data-role-nav]').forEach(link => { link.hidden = !session || link.dataset.roleNav !== session.role; });
+  document.querySelectorAll('[data-role-nav]').forEach(link => {
+    if (!session) {
+      link.hidden = true;
+    } else if (session.role === 'admin') {
+      link.hidden = !['admin', 'manager'].includes(link.dataset.roleNav);
+    } else {
+      link.hidden = link.dataset.roleNav !== session.role;
+    }
+  });
 }
 
 let workspacePollingTimer = null;
@@ -153,14 +175,18 @@ async function refreshWorkspaceFromServer() {
     const updatedSession = { ...session, businessName: workspace.businessName || session.businessName || '' };
     window.SmartShiftAuth.setSession(updatedSession);
 
-    const activeView = session.role === 'manager' ? 'manager' : 'employee';
+    const activeView = session.role === 'admin' ? 'admin' : session.role === 'manager' ? 'manager' : 'employee';
     if (document.getElementById(`view-${activeView}`)?.classList.contains('active')) {
-      if (session.role === 'manager') {
+      if (session.role === 'admin') {
+        window.refreshAdminDashboard?.();
+      } else if (session.role === 'manager') {
         updateManagerBusinessBranding(updatedSession);
         window.refreshManagerWorkspace?.();
       } else {
         window.refreshEmployeeWorkspace?.();
       }
+    } else if (document.getElementById('view-manager')?.classList.contains('active') && session.role === 'admin') {
+      window.refreshManagerWorkspace?.();
     } else if (document.getElementById('view-profile')?.classList.contains('active')) {
       renderProfile();
     }
@@ -204,25 +230,43 @@ function updateManagerBusinessBranding(session) {
 function renderProfile() {
   const session = window.SmartShiftAuth?.getSession();
   if (!session) return;
+  const admin = session.role === 'admin';
   const manager = session.role === 'manager';
-  const worker = !manager ? window.mockDatabase.workers.find(item => item.id === (session.workerId || session.id)) : null;
+  const isBusinessLeader = admin || manager;
+  const worker = !isBusinessLeader ? window.mockDatabase.workers.find(item => item.id === (session.workerId || session.id)) : null;
+
   document.getElementById('profileName').textContent = session.name || 'SmartShift user';
-  document.getElementById('profileSubtitle').textContent = manager ? 'Manager account · Workspace administrator' : `Staff account · ${session.businessName || 'Cafe'} team member`;
+  document.getElementById('profileSubtitle').textContent = admin
+    ? 'Cafe Owner & Administrator · Full Workspace Authority'
+    : manager
+    ? 'Store Manager · Shift & Roster Planner'
+    : `Staff account · ${session.businessName || 'Cafe'} team member`;
+
   document.getElementById('profileDetailName').textContent = session.name || '—';
   document.getElementById('profileDetailEmail').textContent = session.email || '—';
-  document.getElementById('profileDetailRole').textContent = manager ? 'Manager' : 'Staff';
-  document.getElementById('profileWorkspaceTitle').textContent = manager ? 'Manager workspace' : (session.businessName || 'Staff workspace');
-  document.getElementById('profileWorkspaceText').textContent = manager ? 'Create shifts, manage your team, and publish conflict-free rosters.' : 'You are connected to this cafe. Share availability, request leave, and view your confirmed shifts here.';
+  document.getElementById('profileDetailRole').textContent = admin ? 'Cafe Admin' : manager ? 'Manager' : 'Staff';
+  document.getElementById('profileWorkspaceTitle').textContent = isBusinessLeader ? `${session.businessName || 'Cafe'} Workspace` : (session.businessName || 'Staff workspace');
+  document.getElementById('profileWorkspaceText').textContent = admin
+    ? 'Full administrative control over managers, staff, cafe settings, and roster policies.'
+    : manager
+    ? 'Create shifts, manage your team, and publish conflict-free rosters.'
+    : 'You are connected to this cafe. Share availability, request leave, and view your confirmed shifts here.';
+
   const savedBusinessName = getManagerBusinessName(session);
-  if (manager) updateManagerBusinessBranding(session);
+  if (isBusinessLeader) updateManagerBusinessBranding(session);
+
   const workspaceButton = document.getElementById('btnProfileWorkspace');
-  if (workspaceButton) workspaceButton.textContent = manager ? 'Open manager dashboard' : 'Open staff portal';
-  document.getElementById('profileAvatar').textContent = manager ? '🛡️' : '👤';
+  if (workspaceButton) {
+    workspaceButton.textContent = admin ? 'Open admin portal' : manager ? 'Open manager dashboard' : 'Open staff portal';
+  }
+
+  document.getElementById('profileAvatar').textContent = admin ? '👑' : manager ? '🛡️' : '👤';
   document.getElementById('profileEditName').value = session.name || '';
   document.getElementById('profileEditEmail').value = session.email || '';
-  document.getElementById('profileStaffFields').hidden = manager;
-  document.getElementById('profileManagerFields').hidden = !manager;
-  if (manager) {
+  document.getElementById('profileStaffFields').hidden = isBusinessLeader;
+  document.getElementById('profileManagerFields').hidden = !isBusinessLeader;
+
+  if (isBusinessLeader) {
     document.getElementById('profileEditBusiness').value = savedBusinessName;
     document.getElementById('profileInviteCode').value = session.joinCode || '';
   }
@@ -363,20 +407,21 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.setAttribute('aria-selected', String(active));
       });
       document.querySelectorAll('.signup-only').forEach(field => { field.hidden = !signup; });
+      const adminSignup = signup && selectedRole === 'admin';
       const managerSignup = signup && selectedRole === 'manager';
       const staffSignup = signup && selectedRole === 'employee';
-      businessNameSignupGroup.hidden = !managerSignup;
+      businessNameSignupGroup.hidden = !(adminSignup || managerSignup);
       joinCodeSignupGroup.hidden = !staffSignup;
-      businessNameInput.required = managerSignup;
+      businessNameInput.required = adminSignup || managerSignup;
       joinCodeInput.required = staffSignup;
       fullNameInput.required = signup;
       authSubmit.textContent = signup ? 'Create account' : 'Log in to SmartShift';
       authHelper.textContent = signup
-        ? (managerSignup ? 'Set up your cafe workspace.' : staffSignup ? 'Join your cafe with the invite code from your manager.' : 'Create your account.')
-        : `Welcome back. Log in to continue to your ${selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`;
+        ? (adminSignup ? 'Set up your cafe workspace as Cafe Administrator & Owner.' : managerSignup ? 'Set up your cafe workspace or join with manager code.' : staffSignup ? 'Join your cafe with the invite code from your manager or admin.' : 'Create your account.')
+        : (selectedRole === 'admin' ? 'Welcome back. Log in to your cafe administration console.' : `Welcome back. Log in to continue to your ${selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`);
       if (!signup) {
-        emailInput.value = selectedRole === 'manager' ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
-        passwordInput.value = selectedRole === 'manager' ? 'manager123' : 'employee123';
+        emailInput.value = selectedRole === 'admin' ? 'admin@smartshift.local' : selectedRole === 'manager' ? 'manager@smartshift.local' : 'alex.rivera@smartshift.com';
+        passwordInput.value = selectedRole === 'admin' ? 'admin123' : selectedRole === 'manager' ? 'manager123' : 'employee123';
       } else {
         emailInput.value = '';
         passwordInput.value = '';
@@ -396,16 +441,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (authMode === 'signup') {
         if (localUsers.some(item => item.email.toLowerCase() === emailInput.value.toLowerCase())) throw new Error('An account with this email already exists.');
         const user = { id: `local-${Date.now()}`, name: fullNameInput.value.trim(), email: emailInput.value.trim().toLowerCase(), role: selectedRole };
-        if (selectedRole === 'manager') user.businessName = businessNameInput.value.trim();
+        if (selectedRole === 'admin' || selectedRole === 'manager') user.businessName = businessNameInput.value.trim();
         if (selectedRole === 'employee') user.joinCode = joinCodeInput.value.trim().toUpperCase();
         localUsers.push({ ...user, password: passwordInput.value });
         localStorage.setItem('smartshift-users', JSON.stringify(localUsers));
         return user;
       }
       const user = localUsers.find(item => item.email === emailInput.value && item.password === passwordInput.value && item.role === selectedRole);
-      const isDemo = (emailInput.value === 'manager@smartshift.local' && passwordInput.value === 'manager123' && selectedRole === 'manager') || (emailInput.value === 'alex.rivera@smartshift.com' && passwordInput.value === 'employee123' && selectedRole === 'employee');
+      const isDemo = (emailInput.value === 'admin@smartshift.local' && passwordInput.value === 'admin123' && selectedRole === 'admin') ||
+        (emailInput.value === 'manager@smartshift.local' && passwordInput.value === 'manager123' && selectedRole === 'manager') ||
+        (emailInput.value === 'alex.rivera@smartshift.com' && passwordInput.value === 'employee123' && selectedRole === 'employee');
       if (user) return user;
-      if (isDemo) return { id: selectedRole === 'manager' ? 'manager-1' : 'emp1', name: selectedRole === 'manager' ? 'Maya Chen' : 'Alex Rivera', email: emailInput.value, role: selectedRole, businessName: selectedRole === 'manager' ? "Maya Chen's Cafe" : '' };
+      if (isDemo) {
+        if (selectedRole === 'admin') return { id: 'admin-1', name: 'Elena Vance', email: emailInput.value, role: 'admin', businessName: "Downtown Cafe & Bistro", joinCode: 'CAFE1234', managerJoinCode: 'MGR1234' };
+        if (selectedRole === 'manager') return { id: 'manager-1', name: 'Maya Chen', email: emailInput.value, role: 'manager', businessName: "Downtown Cafe & Bistro" };
+        return { id: 'emp1', name: 'Alex Rivera', email: emailInput.value, role: 'employee', businessName: "Downtown Cafe & Bistro" };
+      }
       throw new Error('Invalid email, password, or selected role.');
     };
 
@@ -429,9 +480,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (submitButton) submitButton.disabled = true;
       try {
         let user;
+        const isBusinessLeader = ['admin', 'manager'].includes(selectedRole);
         if (window.SmartShiftAPI) {
           user = authMode === 'signup'
-            ? await window.SmartShiftAPI.signup({ name: fullNameInput.value.trim(), email, password, role: selectedRole, ...(selectedRole === 'manager' ? { businessName: businessNameInput.value.trim() } : { joinCode: joinCodeInput.value.trim().toUpperCase() }) })
+            ? await window.SmartShiftAPI.signup({ name: fullNameInput.value.trim(), email, password, role: selectedRole, ...(isBusinessLeader ? { businessName: businessNameInput.value.trim() } : { joinCode: joinCodeInput.value.trim().toUpperCase() }) })
             : await window.SmartShiftAPI.login({ email, password, role: selectedRole });
           const workspace = await window.SmartShiftAPI.loadWorkspace();
           Object.assign(window.mockDatabase, workspace);
@@ -441,12 +493,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.SmartShiftAuth.setSession(user);
         updateAuthNav();
-      startWorkspacePolling();
+        startWorkspacePolling();
         if (selectedRole === 'employee' && !window.mockDatabase.workers.some(worker => worker.id === user.id)) {
           window.mockDatabase.workers.push({ id: user.id, name: user.name, role: 'Staff member', certifications: [], maxWeeklyHours: 25, currentAssignedHours: 0, hourlyRate: 200, availability: {} });
           window.persistMockDatabase?.();
         }
-        showToast(`${authMode === 'signup' ? 'Account created' : 'Welcome back'}! Opening your ${selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`, 'success');
+        showToast(`${authMode === 'signup' ? 'Account created' : 'Welcome back'}! Opening your ${selectedRole === 'admin' ? 'admin portal' : selectedRole === 'manager' ? 'manager' : 'staff'} workspace.`, 'success');
         switchView(selectedRole);
       } catch (error) {
         const networkError = error instanceof TypeError || /fetch|network|failed to fetch/i.test(error.message || '');

@@ -1,18 +1,30 @@
 {
   "users": [
     {
+      "id": "admin-1",
+      "name": "Elena Vance",
+      "email": "admin@smartshift.local",
+      "role": "admin",
+      "password": "admin123",
+      "businessName": "Downtown Cafe & Bistro",
+      "workspaceId": "admin-1"
+    },
+    {
       "id": "manager-1",
       "name": "Maya Chen",
       "email": "manager@smartshift.local",
       "role": "manager",
-      "password": "manager123"
+      "password": "manager123",
+      "businessName": "Downtown Cafe & Bistro",
+      "workspaceId": "admin-1"
     },
     {
       "id": "emp1",
       "name": "Alex Rivera",
       "email": "alex.rivera@smartshift.com",
       "role": "employee",
-      "password": "employee123"
+      "password": "employee123",
+      "workspaceId": "admin-1"
     }
   ],
   "workers": [
@@ -26,7 +38,7 @@
         "Food Safety"
       ],
       "maxWeeklyHours": 25,
-      "currentAssignedHours": 18,
+      "currentAssignedHours": 23,
       "hourlyRate": 250
     },
     {
@@ -38,7 +50,7 @@
         "Kitchen Prep"
       ],
       "maxWeeklyHours": 20,
-      "currentAssignedHours": 10,
+      "currentAssignedHours": 15,
       "hourlyRate": 220
     },
     {
@@ -50,7 +62,7 @@
         "Food Safety"
       ],
       "maxWeeklyHours": 25,
-      "currentAssignedHours": 12,
+      "currentAssignedHours": 22,
       "hourlyRate": 200
     },
     {
@@ -78,7 +90,7 @@
       "duration": 5,
       "requiredRole": "Barista",
       "department": "Cafe Floor",
-      "assignedWorkerId": null
+      "assignedWorkerId": "emp1"
     },
     {
       "id": "shift_sat_am",
@@ -89,7 +101,7 @@
       "duration": 5,
       "requiredRole": "Cashier",
       "department": "Front Register",
-      "assignedWorkerId": null
+      "assignedWorkerId": "emp3"
     },
     {
       "id": "shift_sat_pm",
@@ -100,7 +112,7 @@
       "duration": 5,
       "requiredRole": "Barista",
       "department": "Espresso Bar",
-      "assignedWorkerId": null
+      "assignedWorkerId": "emp2"
     },
     {
       "id": "shift_sun_am",
@@ -111,8 +123,33 @@
       "duration": 5,
       "requiredRole": "Food Safety",
       "department": "Kitchen Prep",
-      "assignedWorkerId": null
+      "assignedWorkerId": "emp3"
     }
   ],
-  "auditLog": []
+  "auditLog": [
+    {
+      "action": "shift.assigned",
+      "shiftId": "shift_fri_pm",
+      "workerId": "emp1",
+      "at": "2026-11-10T08:04:32.400Z"
+    },
+    {
+      "action": "shift.assigned",
+      "shiftId": "shift_sun_am",
+      "workerId": "emp3",
+      "at": "2026-11-10T08:04:36.976Z"
+    },
+    {
+      "action": "shift.assigned",
+      "shiftId": "shift_sat_am",
+      "workerId": "emp3",
+      "at": "2026-11-10T08:05:57.803Z"
+    },
+    {
+      "action": "shift.assigned",
+      "shiftId": "shift_sat_pm",
+      "workerId": "emp2",
+      "at": "2026-11-10T08:13:12.626Z"
+    }
+  ]
 }

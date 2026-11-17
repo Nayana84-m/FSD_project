@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/employee.css" />
   <link rel="stylesheet" href="css/manager.css" />
+  <link rel="stylesheet" href="css/admin.css" />
   <link rel="stylesheet" href="css/validation.css" />
 
   <style>
@@ -69,7 +70,7 @@
     .logo { font: 800 1.65rem var(--font-display); color: var(--text-main); }
     .tagline, .auth-helper { color: var(--text-secondary); font-size: 0.9rem; }
     .auth-feedback { padding: 0.75rem 0.9rem; border-radius: 10px; background: var(--danger-bg); color: #991b1b; border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; font-weight: 600; }
-    .auth-role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .auth-role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 0.65rem; margin-bottom: 1.25rem; }
     .auth-role-card { display: flex; align-items: center; gap: 0.7rem; text-align: left; padding: 0.85rem; background: #fff; border: 1px solid var(--border); border-radius: 14px; color: var(--text-main); }
     .auth-role-card.active { border-color: var(--primary); background: var(--primary-bg); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12); }
     .auth-role-icon { font-size: 1.45rem; }
@@ -109,6 +110,8 @@
         <a href="#how-it-works" data-public-nav="true" class="nav-link">How It Works</a>
         <a href="#" data-role-nav="employee" data-target-view="employee" class="nav-link spa-nav-link">Staff Dashboard</a>
         <a href="#" data-role-nav="manager" data-target-view="manager" class="nav-link spa-nav-link">Manager Dashboard</a>
+        <a href="#" data-role-nav="admin" data-target-view="admin" class="nav-link spa-nav-link">Admin Portal</a>
+        <a href="#" data-role-nav="admin" data-target-view="manager" class="nav-link spa-nav-link">Roster View</a>
       </nav>
 
       <div class="nav-actions">
@@ -128,6 +131,8 @@
       <a href="#" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
       <a href="#" data-role-nav="employee" data-target-view="employee" class="mobile-link spa-nav-link">Staff Dashboard</a>
       <a href="#" data-role-nav="manager" data-target-view="manager" class="mobile-link spa-nav-link">Manager Dashboard</a>
+      <a href="#" data-role-nav="admin" data-target-view="admin" class="mobile-link spa-nav-link">Admin Portal</a>
+      <a href="#" data-role-nav="admin" data-target-view="manager" class="mobile-link spa-nav-link">Roster View</a>
       <div class="mobile-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignupM">Sign up</button>
@@ -356,11 +361,15 @@
         <div class="auth-role-grid" role="radiogroup" aria-label="Choose your SmartShift role">
           <button type="button" class="auth-role-card active" data-role="employee" aria-pressed="true">
             <span class="auth-role-icon">👨‍🍳</span>
-            <span><strong>Staff</strong><small>View shifts and availability</small></span>
+            <span><strong>Staff</strong><small>View shifts & hours</small></span>
           </button>
           <button type="button" class="auth-role-card" data-role="manager" aria-pressed="false">
             <span class="auth-role-icon">🛡️</span>
-            <span><strong>Manager</strong><small>Build and publish rosters</small></span>
+            <span><strong>Manager</strong><small>Roster & shifts</small></span>
+          </button>
+          <button type="button" class="auth-role-card" data-role="admin" aria-pressed="false">
+            <span class="auth-role-icon">👑</span>
+            <span><strong>Admin</strong><small>Cafe owner & director</small></span>
           </button>
         </div>
 
@@ -632,6 +641,251 @@
   </div>
 
   <!-- ======================================================
+       VIEW: CAFE & RESTAURANT ADMIN PORTAL (#view-admin)
+       ====================================================== -->
+  <div id="view-admin" class="app-view">
+    <!-- Admin Header Banner -->
+    <div class="admin-header-banner">
+      <div class="container">
+        <div class="admin-title-row">
+          <div class="admin-hero-info">
+            <div class="admin-crown-avatar">👑</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <h1 id="adminBusinessName" style="font-size:1.65rem; font-weight:800; margin:0;">Downtown Cafe & Bistro</h1>
+                <span class="admin-badge">Cafe Administrator</span>
+              </div>
+              <p id="adminBusinessSubtitle" style="font-size:0.88rem; color:var(--text-secondary); margin-top:0.25rem;">
+                Downtown Cafe & Bistro &bull; Overseeing Store Managers & Staff Team
+              </p>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.75rem; align-items:center;">
+            <button class="btn btn-outline spa-nav-link" data-target-view="manager">
+              <span>📅 Open Shift Roster</span>
+            </button>
+            <button id="btnAdminOpenAddManager" class="btn btn-primary">
+              <span>+ Add Store Manager</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Admin Container -->
+    <main class="container" style="padding-bottom: 4rem;">
+      <!-- Key Performance Indicators -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-label">Total Staff</div>
+          <div class="admin-stat-val" style="color:var(--primary);" id="adminStatStaff">4</div>
+          <small style="color:var(--text-secondary);">Baristas, cashiers & prep team</small>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-label">Store Managers</div>
+          <div class="admin-stat-val" style="color:#2563eb;" id="adminStatManagers">1</div>
+          <small style="color:var(--text-secondary);">Shift planning supervisors</small>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-label">Scheduled Hours</div>
+          <div class="admin-stat-val" style="color:var(--text-main);" id="adminStatHours">20 hrs</div>
+          <small style="color:var(--text-secondary);">Total confirmed shift hours</small>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-label">Est. Weekly Payroll</div>
+          <div class="admin-stat-val" style="color:#059669;" id="adminStatPayroll">Rs. 4,800</div>
+          <small id="adminRosterBadge" class="badge badge-warning">Roster in Draft 📝</small>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs for Admin Sections -->
+      <div class="admin-tabs-bar" role="tablist">
+        <button type="button" class="admin-tab-btn active" data-admin-tab="team">
+          <span>👥 Team Oversight (Managers & Staff)</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="settings">
+          <span>⚙️ Cafe Policies & Invite Codes</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="activity">
+          <span>📜 Audit & Activity Trail</span>
+        </button>
+      </div>
+
+      <!-- SECTION 1: TEAM OVERSIGHT -->
+      <section id="adminSec-team" class="admin-section active">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Personnel Directory</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Cafe Staff & Management Roster</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                As cafe administrator, you have full authority to assign roles, appoint managers, set pay limits, and manage staff.
+              </p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="window.refreshAdminDashboard()">🔄 Refresh</button>
+          </div>
+
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Team Member</th>
+                  <th>Workspace Role</th>
+                  <th>Role / Skills</th>
+                  <th>Max Hours</th>
+                  <th>Hourly Pay</th>
+                  <th>Administrative Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminPersonnelTableBody">
+                <!-- Dynamically generated by admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: CAFE POLICIES & INVITE CODES -->
+      <section id="adminSec-settings" class="admin-section">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Access & Joining</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Cafe Workspace Invite Codes</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                Share these private 8-character codes to onboard managers and staff directly into your business.
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-code-card-grid">
+            <div class="admin-code-card">
+              <div style="font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+                <span>👨‍🍳 Staff Member Invite Code</span>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">
+                Give this code to new baristas, cashiers, and servers so they join this cafe's roster.
+              </p>
+              <div class="admin-code-box">
+                <code id="adminStaffCodeDisplay">CAFE1234</code>
+                <div style="display:flex; gap:0.4rem;">
+                  <button id="btnCopyStaffCode" class="btn btn-ghost btn-xs">Copy</button>
+                  <button id="btnRegenStaffCode" class="btn btn-outline btn-xs">Regenerate</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-code-card">
+              <div style="font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+                <span>🛡️ Store Manager Invite Code</span>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">
+                Give this code to appointed shift planners or store managers to grant manager privileges.
+              </p>
+              <div class="admin-code-box">
+                <code id="adminManagerCodeDisplay">MGR1234</code>
+                <div style="display:flex; gap:0.4rem;">
+                  <button id="btnCopyManagerCode" class="btn btn-ghost btn-xs">Copy</button>
+                  <button id="btnRegenManagerCode" class="btn btn-outline btn-xs">Regenerate</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Business Rules</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Cafe Operating Policies</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                Configure the baseline scheduling guardrails enforced across all shifts and team members.
+              </p>
+            </div>
+          </div>
+
+          <form id="adminSettingsForm" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Cafe / Business Name</label>
+              <input type="text" id="adminSettingBizName" class="form-input" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" required>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Default Max Weekly Hours Cap</label>
+              <input type="number" id="adminSettingMaxHours" class="form-input" min="1" max="60" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" required>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Base Hourly Rate (Rs.)</label>
+              <input type="number" id="adminSettingRate" class="form-input" min="1" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" required>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Business Phone (Optional)</label>
+              <input type="text" id="adminSettingPhone" class="form-input" placeholder="+91 98765 43210" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);">
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Store / Cafe Address (Optional)</label>
+              <input type="text" id="adminSettingAddress" class="form-input" placeholder="123 Brigade Road, Bangalore" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);">
+            </div>
+            <div style="grid-column: 1 / -1; text-align:right;">
+              <button type="submit" class="btn btn-primary">💾 Save Cafe Policies</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- SECTION 3: AUDIT & ACTIVITY TRAIL -->
+      <section id="adminSec-activity" class="admin-section">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Accountability</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Cafe Action & Audit Trail</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                Chronological log of shift creations, roster publishing, leaves, and team adjustments for this cafe.
+              </p>
+            </div>
+          </div>
+          <div id="adminActivityList" class="admin-activity-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal: Add Store Manager -->
+    <div id="adminAddManagerModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Appoint New Store Manager</h3>
+          <button id="btnAdminCloseAddManager" class="modal-close-btn" type="button">&times;</button>
+        </div>
+        <form id="adminAddManagerForm">
+          <div class="modal-body" style="display:grid; gap:1rem;">
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+              Store managers have permission to build weekly rosters, assign shifts, and approve leave requests for your cafe.
+            </p>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Manager's Full Name</label>
+              <input type="text" id="newManagerName" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" placeholder="Priya Sharma" required>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Manager's Work Email</label>
+              <input type="email" id="newManagerEmail" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" placeholder="priya@cafe.com" required>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.8rem; margin-bottom:0.35rem;">Temporary Password (min 8 characters)</label>
+              <input type="password" id="newManagerPassword" minlength="8" style="width:100%; padding:0.7rem; border-radius:10px; border:1px solid var(--border);" placeholder="managerPass123" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="btnAdminCancelAddManager" type="button" class="btn btn-outline">Cancel</button>
+            <button type="submit" class="btn btn-primary">Appoint Manager</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================
        VIEW 5: PROFILE
        ====================================================== -->
   <div id="view-profile" class="app-view">
@@ -665,6 +919,7 @@
           <li><a href="#" data-target-view="login" class="spa-nav-link">Login Portal</a></li>
           <li><a href="#" data-target-view="employee" class="spa-nav-link">Staff Portal</a></li>
           <li><a href="#" data-target-view="manager" class="spa-nav-link">Manager Shift Matrix</a></li>
+          <li><a href="#" data-target-view="admin" class="spa-nav-link">Admin Portal</a></li>
         </ul>
       </div>
     </div>
@@ -683,6 +938,7 @@
   <script src="js/validation.js"></script>
   <script src="js/employee.js"></script>
   <script src="js/manager.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/app.js"></script>
   <script src="js/interactions.js"></script>

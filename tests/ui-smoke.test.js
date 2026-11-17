@@ -5,7 +5,7 @@ const fs = require("node:fs");
 const html = fs.readFileSync("index.html", "utf8");
 
 test("core role-based screens and workflow controls exist", () => {
-  ["view-login", "view-employee", "view-manager", "view-profile", "loginForm", "createShiftForm", "addStaffForm", "leaveRequestForm", "managerLeaveRequests", "employeeUpcomingShifts"].forEach(id => {
+  ["view-login", "view-employee", "view-manager", "view-admin", "view-profile", "loginForm", "createShiftForm", "addStaffForm", "leaveRequestForm", "managerLeaveRequests", "employeeUpcomingShifts", "adminPersonnelTableBody", "adminAddManagerModal"].forEach(id => {
     assert.match(html, new RegExp(`id=["']${id}["']`), `missing #${id}`);
   });
   assert.match(html, /id=["']view-landing["'] class=["']app-view active["']/);

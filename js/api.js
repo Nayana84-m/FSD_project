@@ -56,6 +56,30 @@
     async assignShift(shiftId, workerId) {
       return request(`/shifts/${shiftId}/assign`, { method: "POST", body: JSON.stringify({ workerId }) });
     },
+    async loadAdminOverview() {
+      const result = await request("/admin/overview");
+      return result.data;
+    },
+    async addManager(managerData) {
+      const result = await request("/admin/managers", { method: "POST", body: JSON.stringify(managerData) });
+      return result.data.manager;
+    },
+    async updateUserRole(userId, role) {
+      const result = await request(`/admin/users/${userId}/role`, { method: "PUT", body: JSON.stringify({ role }) });
+      return result.data;
+    },
+    async deleteUser(userId) {
+      const result = await request(`/admin/users/${userId}`, { method: "DELETE" });
+      return result.data;
+    },
+    async updateAdminSettings(settings) {
+      const result = await request("/admin/settings", { method: "PUT", body: JSON.stringify(settings) });
+      return result.data;
+    },
+    async regenerateInviteCode(type) {
+      const result = await request("/admin/codes/regenerate", { method: "POST", body: JSON.stringify({ type }) });
+      return result.data;
+    },
     async isHealthy() {
       try { await request("/health"); return true; } catch { return false; }
     }
