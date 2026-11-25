@@ -10,22 +10,25 @@ function switchView(targetView, scrollToSectionId = null) {
   const views = ['landing', 'login', 'employee', 'manager', 'profile', 'admin'];
   const session = window.SmartShiftAuth?.getSession();
 
-  let wrongRole = false;
-  if (targetView === 'employee' && session && session.role !== 'employee') wrongRole = true;
-  if (targetView === 'manager' && session && !['manager', 'admin'].includes(session.role)) wrongRole = true;
-  if (targetView === 'admin' && session && session.role !== 'admin') wrongRole = true;
-
-  if (wrongRole) {
-    window.SmartShiftAuth.clearSession();
-    window.localStorage.removeItem('smartshift-token');
-    updateAuthNav();
-    setLoginRole(targetView === 'admin' ? 'admin' : targetView);
-    targetView = 'login';
-  } else if ((targetView === 'employee' || targetView === 'manager' || targetView === 'admin') && !session) {
-    setLoginRole(targetView);
-    targetView = 'login';
-  } else if (targetView === 'profile' && !session) {
-    targetView = 'login';
+  // Strict role isolation
+  if (session) {
+    if (targetView === 'employee' && session.role !== 'employee') {
+      showToast(`Access restricted: You are signed in as ${session.role === 'admin' ? 'Cafe Admin' : 'Store Manager'}. Open your own portal.`, 'danger');
+      targetView = session.role;
+    } else if (targetView === 'manager' && session.role !== 'manager') {
+      showToast(`Access restricted: You are signed in as ${session.role === 'admin' ? 'Cafe Admin' : 'Staff'}. Open your own portal.`, 'danger');
+      targetView = session.role;
+    } else if (targetView === 'admin' && session.role !== 'admin') {
+      showToast(`Access restricted: You are signed in as ${session.role === 'manager' ? 'Store Manager' : 'Staff'}. Open your own portal.`, 'danger');
+      targetView = session.role;
+    } else if (targetView === 'login') {
+      targetView = session.role;
+    }
+  } else {
+    if (['employee', 'manager', 'admin', 'profile'].includes(targetView)) {
+      setLoginRole(targetView === 'profile' ? 'employee' : targetView);
+      targetView = 'login';
+    }
   }
   
   views.forEach(v => {
@@ -136,21 +139,45 @@ function updateAuthNav() {
   const signupButton = document.getElementById('btnSignup');
   const mobileLoginButton = document.getElementById('btnLoginM');
   const mobileSignupButton = document.getElementById('btnSignupM');
+  const navUserBadge = document.getElementById('navUserBadge');
+  const btnNavLogout = document.getElementById('btnNavLogout');
+  const btnNavLogoutM = document.getElementById('btnNavLogoutM');
+
   if (profileButton) profileButton.hidden = !session;
   if (loginButton) loginButton.hidden = Boolean(session);
   if (signupButton) signupButton.hidden = Boolean(session);
   if (mobileLoginButton) mobileLoginButton.hidden = Boolean(session);
   if (mobileSignupButton) mobileSignupButton.hidden = Boolean(session);
+  if (btnNavLogout) btnNavLogout.hidden = !session;
+  if (btnNavLogoutM) btnNavLogoutM.hidden = !session;
+
+  if (navUserBadge) {
+    if (session) {
+      navUserBadge.hidden = false;
+      const roleIcon = session.role === 'admin' ? '👑' : session.role === 'manager' ? '🛡️' : '👨‍🍳';
+      const roleLabel = session.role === 'admin' ? 'Admin' : session.role === 'manager' ? 'Manager' : 'Staff';
+      navUserBadge.textContent = `${roleIcon} ${session.name || 'User'} (${roleLabel})`;
+      navUserBadge.className = `badge ${session.role === 'admin' ? 'badge-primary' : session.role === 'manager' ? 'badge-info' : 'badge-warning'}`;
+    } else {
+      navUserBadge.hidden = true;
+    }
+  }
+
   document.body.classList.toggle('workspace-mode', Boolean(session));
   document.querySelectorAll('[data-public-nav="true"]').forEach(link => { link.hidden = Boolean(session); });
+  
+  // Strictly isolate role navigation links so each role only sees their own portal
   document.querySelectorAll('[data-role-nav]').forEach(link => {
     if (!session) {
       link.hidden = true;
-    } else if (session.role === 'admin') {
-      link.hidden = !['admin', 'manager'].includes(link.dataset.roleNav);
     } else {
       link.hidden = link.dataset.roleNav !== session.role;
     }
+  });
+
+  // Footer authenticated links
+  document.querySelectorAll('[data-auth-only="true"]').forEach(link => {
+    link.hidden = !session;
   });
 }
 
@@ -278,8 +305,12 @@ function renderProfile() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const initialSession = window.SmartShiftAuth?.getSession();
   updateAuthNav();
-  if (window.SmartShiftAuth?.getSession()) startWorkspacePolling();
+  if (initialSession) {
+    startWorkspacePolling();
+    switchView(initialSession.role);
+  }
   // Bind all nav links with data-target-view
   document.addEventListener('click', (e) => {
     const targetLink = e.target.closest('[data-target-view]');
@@ -326,13 +357,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const session = window.SmartShiftAuth?.getSession();
     switchView(session?.role || 'login');
   });
-  document.getElementById('btnLogout')?.addEventListener('click', () => {
+  const handleLogout = () => {
     window.SmartShiftAuth?.clearSession();
     window.localStorage.removeItem('smartshift-token');
     updateAuthNav();
     showToast('You have been logged out safely.', 'success');
     switchView('login');
-  });
+  };
+  document.getElementById('btnLogout')?.addEventListener('click', handleLogout);
+  document.getElementById('btnNavLogout')?.addEventListener('click', handleLogout);
+  document.getElementById('btnNavLogoutM')?.addEventListener('click', handleLogout);
   document.getElementById('profileEditForm')?.addEventListener('submit', async event => {
     event.preventDefault();
     const session = window.SmartShiftAuth?.getSession();

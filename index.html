@@ -111,13 +111,14 @@
         <a href="#" data-role-nav="employee" data-target-view="employee" class="nav-link spa-nav-link">Staff Dashboard</a>
         <a href="#" data-role-nav="manager" data-target-view="manager" class="nav-link spa-nav-link">Manager Dashboard</a>
         <a href="#" data-role-nav="admin" data-target-view="admin" class="nav-link spa-nav-link">Admin Portal</a>
-        <a href="#" data-role-nav="admin" data-target-view="manager" class="nav-link spa-nav-link">Roster View</a>
       </nav>
 
       <div class="nav-actions">
+        <span id="navUserBadge" class="badge badge-info" style="font-weight:700; font-size:0.8rem; padding:0.35rem 0.75rem;" hidden></span>
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLogin">Login</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignup">Sign up</button>
         <button class="btn btn-ghost spa-nav-link" data-target-view="profile" id="btnProfile" hidden>Profile</button>
+        <button class="btn btn-outline" id="btnNavLogout" hidden style="margin-left:0.25rem; font-size:0.82rem; padding:0.4rem 0.85rem;">Log out</button>
       </div>
 
       <!-- Hamburger (mobile) -->
@@ -128,14 +129,14 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-      <a href="#" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
+      <a href="#" data-public-nav="true" data-target-view="landing" class="mobile-link spa-nav-link">Home</a>
       <a href="#" data-role-nav="employee" data-target-view="employee" class="mobile-link spa-nav-link">Staff Dashboard</a>
       <a href="#" data-role-nav="manager" data-target-view="manager" class="mobile-link spa-nav-link">Manager Dashboard</a>
       <a href="#" data-role-nav="admin" data-target-view="admin" class="mobile-link spa-nav-link">Admin Portal</a>
-      <a href="#" data-role-nav="admin" data-target-view="manager" class="mobile-link spa-nav-link">Roster View</a>
       <div class="mobile-actions">
         <button class="btn btn-ghost spa-nav-link" data-target-view="login" id="btnLoginM">Login</button>
         <button class="btn btn-primary spa-nav-link" data-target-view="login" data-auth-mode="signup" id="btnSignupM">Sign up</button>
+        <button class="btn btn-outline" id="btnNavLogoutM" hidden style="width:100%; margin-top:0.5rem;">Log out</button>
       </div>
     </div>
   </header>
@@ -661,10 +662,10 @@
             </div>
           </div>
           <div style="display:flex; gap:0.75rem; align-items:center;">
-            <button class="btn btn-outline spa-nav-link" data-target-view="manager">
-              <span>📅 Open Shift Roster</span>
+            <button id="btnAdminQuickRoster" type="button" class="btn btn-outline">
+              <span>📅 View Shift Roster</span>
             </button>
-            <button id="btnAdminOpenAddManager" class="btn btn-primary">
+            <button id="btnAdminOpenAddManager" class="btn btn-primary" type="button">
               <span>+ Add Store Manager</span>
             </button>
           </div>
@@ -702,6 +703,9 @@
       <div class="admin-tabs-bar" role="tablist">
         <button type="button" class="admin-tab-btn active" data-admin-tab="team">
           <span>👥 Team Oversight (Managers & Staff)</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-admin-tab="roster">
+          <span>📅 Shift Roster & Leave Oversight</span>
         </button>
         <button type="button" class="admin-tab-btn" data-admin-tab="settings">
           <span>⚙️ Cafe Policies & Invite Codes</span>
@@ -745,7 +749,57 @@
         </div>
       </section>
 
-      <!-- SECTION 2: CAFE POLICIES & INVITE CODES -->
+      <!-- SECTION 2: SHIFT ROSTER & LEAVES OVERSIGHT -->
+      <section id="adminSec-roster" class="admin-section">
+        <div class="admin-card" style="margin-bottom: 1.5rem;">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Shift Schedule Oversight</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Weekly Cafe Shift Schedule</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                Live schedule of confirmed and open shifts planned across all days of the week.
+              </p>
+            </div>
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <span id="adminRosterStatusTag" class="badge badge-success">Live Sync Active</span>
+            </div>
+          </div>
+          <div class="admin-table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Day & Time</th>
+                  <th>Shift Type</th>
+                  <th>Required Skill</th>
+                  <th>Assigned Worker</th>
+                  <th>Hours</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="adminRosterTableBody">
+                <!-- Dynamically populated by admin.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div>
+              <span class="section-tag">Leave Oversight</span>
+              <h2 style="font-size:1.25rem; font-weight:800; margin:0.25rem 0;">Staff Leave Requests</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin:0;">
+                Review pending, approved, and rejected time-off requests from cafe team members.
+              </p>
+            </div>
+          </div>
+          <div id="adminLeaveList" class="admin-leave-list" style="display:grid; gap:0.75rem;">
+            <!-- Dynamically populated by admin.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: CAFE POLICIES & INVITE CODES -->
       <section id="adminSec-settings" class="admin-section">
         <div class="admin-card">
           <div class="admin-card-header">
@@ -915,11 +969,12 @@
       <div class="footer-links-col">
         <h4>Views Navigation</h4>
         <ul>
-          <li><a href="#" data-target-view="landing" class="spa-nav-link">Home Landing Page</a></li>
-          <li><a href="#" data-target-view="login" class="spa-nav-link">Login Portal</a></li>
-          <li><a href="#" data-target-view="employee" class="spa-nav-link">Staff Portal</a></li>
-          <li><a href="#" data-target-view="manager" class="spa-nav-link">Manager Shift Matrix</a></li>
-          <li><a href="#" data-target-view="admin" class="spa-nav-link">Admin Portal</a></li>
+          <li><a href="#" data-public-nav="true" data-target-view="landing" class="spa-nav-link">Home Landing Page</a></li>
+          <li><a href="#" data-public-nav="true" data-target-view="login" class="spa-nav-link">Login Portal</a></li>
+          <li data-role-nav="employee"><a href="#" data-target-view="employee" class="spa-nav-link">Staff Portal</a></li>
+          <li data-role-nav="manager"><a href="#" data-target-view="manager" class="spa-nav-link">Manager Shift Matrix</a></li>
+          <li data-role-nav="admin"><a href="#" data-target-view="admin" class="spa-nav-link">Admin Portal</a></li>
+          <li data-auth-only="true" hidden><a href="#" data-target-view="profile" class="spa-nav-link">Account Profile</a></li>
         </ul>
       </div>
     </div>

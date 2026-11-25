@@ -60,6 +60,8 @@
         { id: 'manager-1', name: 'Maya Chen', email: 'manager@smartshift.local', role: 'manager' }
       ],
       staff: workers,
+      shifts: shifts,
+      leaveRequests: mock.leaveRequests || [],
       recentActivity: [
         { action: 'system.ready', at: new Date().toISOString() }
       ]
@@ -222,16 +224,116 @@
     }).join('');
   }
 
+  function renderRosterOverview(data) {
+    const tbody = document.getElementById('adminRosterTableBody');
+    if (!tbody) return;
+
+    const shifts = data.shifts || window.mockDatabase?.shifts || [];
+    const workers = data.staff || window.mockDatabase?.workers || [];
+
+    if (!shifts.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-secondary); padding:2rem;">No shifts scheduled yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = shifts.map(shift => {
+      const assigned = workers.find(w => w.id === shift.assignedWorkerId);
+      const isAssigned = Boolean(assigned);
+      return `
+        <tr>
+          <td>
+            <strong>${shift.day}</strong>
+            <div style="font-size:0.8rem; color:var(--text-secondary);">${shift.startTime} – ${shift.endTime}</div>
+          </td>
+          <td><span class="badge badge-info">${shift.type || 'Standard'}</span></td>
+          <td>${shift.requiredSkill || 'General'}</td>
+          <td>
+            ${isAssigned
+              ? `<div style="font-weight:700;">👨‍🍳 ${assigned.name}</div><small style="color:var(--text-secondary);">${assigned.role || 'Staff'}</small>`
+              : `<span style="color:#d97706; font-weight:600;">⚠️ Unassigned</span>`}
+          </td>
+          <td>${shift.duration || 5} hrs</td>
+          <td>
+            <span class="badge ${isAssigned ? 'badge-success' : 'badge-warning'}">
+              ${isAssigned ? 'Assigned' : 'Open Shift'}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderLeaveRequests(data) {
+    const container = document.getElementById('adminLeaveList');
+    if (!container) return;
+
+    const leaves = data.leaveRequests || window.mockDatabase?.leaveRequests || [];
+    const workers = data.staff || window.mockDatabase?.workers || [];
+
+    if (!leaves.length) {
+      container.innerHTML = `<div style="color:var(--text-secondary); padding:1.5rem; text-align:center;">No leave requests submitted.</div>`;
+      return;
+    }
+
+    container.innerHTML = leaves.map(req => {
+      const worker = workers.find(w => w.id === req.workerId) || { name: req.workerName || 'Staff Member' };
+      const isPending = req.status === 'pending';
+      return `
+        <div class="admin-activity-item" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; padding:0.85rem; border:1px solid var(--border); border-radius:10px;">
+          <div>
+            <div style="font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+              <span>👨‍🍳 ${worker.name}</span>
+              <span class="badge ${req.status === 'approved' ? 'badge-success' : req.status === 'rejected' ? 'badge-danger' : 'badge-warning'}">
+                ${req.status.toUpperCase()}
+              </span>
+            </div>
+            <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.2rem;">
+              <strong>Days:</strong> ${(req.days || [req.day]).filter(Boolean).join(', ')} &bull; <em>"${req.reason || 'No reason provided'}"</em>
+            </div>
+          </div>
+          ${isPending ? `
+            <div style="display:flex; gap:0.4rem;">
+              <button class="btn btn-outline btn-xs" style="color:#059669; border-color:#a7f3d0;" onclick="window.adminDecideLeave('${req.id}', 'approved')">✓ Approve</button>
+              <button class="btn btn-outline btn-xs" style="color:#dc2626; border-color:#fecaca;" onclick="window.adminDecideLeave('${req.id}', 'rejected')">✕ Reject</button>
+            </div>
+          ` : `
+            <small style="color:var(--text-secondary);">${req.reviewedAt ? new Date(req.reviewedAt).toLocaleDateString() : 'Reviewed'}</small>
+          `}
+        </div>
+      `;
+    }).join('');
+  }
+
   async function initAdminDashboard() {
     const data = await loadAdminOverview();
     renderAdminKPIs(data);
     renderPersonnelTable(data);
+    renderRosterOverview(data);
+    renderLeaveRequests(data);
     renderInviteCodes(data);
     renderActivityLog(data);
   }
 
   window.initAdminDashboard = initAdminDashboard;
   window.refreshAdminDashboard = initAdminDashboard;
+
+  window.adminDecideLeave = async function(leaveId, status) {
+    try {
+      if (window.SmartShiftAPI) {
+        await window.SmartShiftAPI.updateLeaveRequest(leaveId, status);
+      } else {
+        const item = (window.mockDatabase.leaveRequests || []).find(r => r.id === leaveId);
+        if (item) {
+          item.status = status;
+          item.reviewedAt = new Date().toISOString();
+        }
+      }
+      window.showToast?.(`Leave request ${status}.`, 'success');
+      await initAdminDashboard();
+    } catch (err) {
+      window.showToast?.(err.message || 'Could not update leave request.', 'danger');
+    }
+  };
 
   // Global Actions for Table Rows
   window.adminChangeRole = async function(userId, newRole) {
@@ -382,6 +484,11 @@
       } catch (err) {
         window.showToast?.(err.message || 'Failed to save cafe settings.', 'danger');
       }
+    });
+
+    document.getElementById('btnAdminQuickRoster')?.addEventListener('click', () => {
+      const tabBtn = document.querySelector('.admin-tab-btn[data-admin-tab="roster"]');
+      if (tabBtn) tabBtn.click();
     });
   });
 })();

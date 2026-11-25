@@ -471,6 +471,8 @@ async function handle(request, response) {
         },
         managers,
         staff: workspace.workers,
+        shifts: workspace.shifts,
+        leaveRequests: workspace.leaveRequests,
         recentActivity: (db.auditLog || []).filter(log => log.workspaceId === workspace.id || log.userId === session.userId).slice(-20).reverse()
       }
     });

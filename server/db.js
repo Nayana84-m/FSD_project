@@ -245,9 +245,27 @@ async function connectDatabase() {
     await stateCollection.insertOne({ _id: "smartshift", ...initial, updatedAt: new Date() });
   } else {
     const { _id, updatedAt, ...state } = existing;
-    let changed = ensureWorkspaces(state);
+    state.users ||= [];
+    let hasAdmin = state.users.some(u => u.role === "admin" || u.email === "admin@smartshift.local");
+    if (!hasAdmin) {
+      const defaultAdmin = {
+        id: "admin-1",
+        name: "Elena Vance",
+        email: "admin@smartshift.local",
+        role: "admin",
+        password: "admin123",
+        businessName: state.workspaces?.[0]?.businessName || "Downtown Cafe & Bistro",
+        workspaceId: state.workspaces?.[0]?.id || "admin-1"
+      };
+      await secureUserPassword(defaultAdmin);
+      state.users.unshift(defaultAdmin);
+      if (state.workspaces?.length && !state.workspaces[0].adminId) {
+        state.workspaces[0].adminId = defaultAdmin.id;
+      }
+    }
+    let changed = ensureWorkspaces(state) || !hasAdmin;
     for (const user of state.users || []) {
-      if (user.role === "manager" && !user.businessName) {
+      if ((user.role === "manager" || user.role === "admin") && !user.businessName) {
         user.businessName = defaultBusinessName(user);
         changed = true;
       }

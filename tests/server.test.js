@@ -118,6 +118,8 @@ test("signup, workspace isolation, assignment, and staff-only roster access work
   const adminOverview = await api("/api/admin/overview", { token: adminToken });
   assert.equal(adminOverview.status, 200);
   assert.equal(adminOverview.payload.data.cafe.businessName, "Seaside Roasters");
+  assert.ok(Array.isArray(adminOverview.payload.data.shifts), "admin overview must contain shifts for oversight");
+  assert.ok(Array.isArray(adminOverview.payload.data.leaveRequests), "admin overview must contain leave requests for oversight");
 
   // Admin directly creates a manager for this cafe
   const addManager = await api("/api/admin/managers", { token: adminToken, method: "POST", body: {
