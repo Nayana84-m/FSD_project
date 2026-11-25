@@ -23,9 +23,12 @@
     // Local / Offline Fallback
     const session = window.SmartShiftAuth?.getSession();
     const mock = window.mockDatabase || {};
-    const localUsers = JSON.parse(localStorage.getItem('smartshift-users') || '[]');
-    const workers = mock.workers || [];
-    const shifts = mock.shifts || [];
+    const isDefaultCafe = !session?.workspaceId || session.workspaceId === 'admin-1';
+    const workers = isDefaultCafe ? (mock.workers || []) : [];
+    const shifts = isDefaultCafe ? (mock.shifts || []) : [];
+    const managers = isDefaultCafe
+      ? [{ id: 'manager-1', name: 'Maya Chen', email: 'manager@smartshift.local', role: 'manager' }]
+      : [];
 
     const totalScheduledHours = shifts
       .filter(s => s.assignedWorkerId)
@@ -41,27 +44,25 @@
     adminOverviewData = {
       cafe: {
         id: session?.workspaceId || 'admin-1',
-        businessName: session?.businessName || "Downtown Cafe & Bistro",
-        staffJoinCode: session?.joinCode || "CAFE1234",
-        managerJoinCode: session?.managerJoinCode || "MGR1234",
+        businessName: session?.businessName || (isDefaultCafe ? "Downtown Cafe & Bistro" : "My Cafe"),
+        staffJoinCode: session?.joinCode || (isDefaultCafe ? "CAFE1234" : "JOIN1234"),
+        managerJoinCode: session?.managerJoinCode || (isDefaultCafe ? "MGR1234" : "MGR1234"),
         businessSettings: { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" }
       },
       stats: {
         totalStaff: workers.length,
-        totalManagers: 1,
+        totalManagers: managers.length,
         totalShifts: shifts.length,
         assignedShifts: shifts.filter(s => s.assignedWorkerId).length,
         scheduledHours: totalScheduledHours,
         estimatedPayroll,
-        pendingLeaves: (mock.leaveRequests || []).filter(l => l.status === "pending").length,
-        rosterStatus: mock.rosterStatus || 'draft'
+        pendingLeaves: isDefaultCafe ? (mock.leaveRequests || []).filter(l => l.status === "pending").length : 0,
+        rosterStatus: isDefaultCafe ? (mock.rosterStatus || 'draft') : 'draft'
       },
-      managers: [
-        { id: 'manager-1', name: 'Maya Chen', email: 'manager@smartshift.local', role: 'manager' }
-      ],
+      managers,
       staff: workers,
       shifts: shifts,
-      leaveRequests: mock.leaveRequests || [],
+      leaveRequests: isDefaultCafe ? (mock.leaveRequests || []) : [],
       recentActivity: [
         { action: 'system.ready', at: new Date().toISOString() }
       ]
