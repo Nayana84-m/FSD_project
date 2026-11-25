@@ -33,22 +33,23 @@ Small businesses and restaurants often plan shifts in spreadsheets and messages.
 
 ### Cafe & Business Owner Administration
 
-Every cafe, restaurant, or small business gets its own separate workspace with multi-tier role-based access:
-- **Admin (Cafe Owner / Business Administrator):** Holds executive authority over that specific cafe. The admin oversees both managers and staff, configures cafe policies, sets invite codes, monitors payroll estimates, and has full supervisory access to shift rosters.
-- **Manager (Shift Supervisor / Store Planner):** Coordinates day-to-day operations: creating shifts, assigning workers via the Smart Validation Engine, reviewing time-off requests, and publishing the weekly roster.
-- **Staff (Employees / Team Members):** Submits availability, views assigned shifts, and requests leave.
+Every cafe, restaurant, or small business gets its own isolated workspace with a multi-tier role-based access model:
+- **Admin (Cafe Owner / Business Administrator):** Holds executive authority over that specific cafe or business. The admin supervises both store managers and staff members, appoints managers, sets cafe operating rules (max weekly hours cap, base pay rates), manages and regenerates dual invite codes, monitors weekly payroll costs, and retains supervisory oversight to inspect shift rosters and leave requests.
+- **Manager (Shift Supervisor / Store Planner):** Coordinates day-to-day operations: creating shifts, assigning workers using the Smart 3-Rule Validation Engine (skills, availability, overtime), reviewing time-off requests, and publishing the weekly roster.
+- **Staff (Employees / Team Members):** Submits weekly availability (available, preferred, unavailable), views confirmed personal shifts, and requests time off.
 
-### A clear, friendly flow
+### Multi-tier workflow
 
 ```mermaid
 flowchart TD
-  A[Admin creates cafe workspace] --> B[Appoints managers & sets cafe policies]
-  A --> C[Generates staff & manager invite codes]
-  B --> D[Manager builds shifts on roster]
-  E[Staff joins with staff code] --> F[Submits weekly availability & leaves]
-  D --> G[SmartShift validates skills, availability & hours]
-  G --> H[Manager/Admin publishes roster]
+  A[Admin creates cafe workspace] --> B[Appoints store managers & sets cafe policies]
+  A --> C[Manages Staff & Manager invite codes]
+  B --> D[Manager builds weekly shifts on roster]
+  E[Staff joins with staff code] --> F[Submits weekly availability & leave requests]
+  D --> G[SmartShift validates skills, availability & weekly hours]
+  G --> H[Manager/Admin publishes conflict-free roster]
   H --> I[Staff sees confirmed personal schedule]
+  A --> J[Admin monitors live weekly payroll & audit trail]
 ```
 
 ## 🚀 Run it on your computer
@@ -125,10 +126,10 @@ In local JSON mode, the same app state is stored in `server/data/db.json`. That 
 ```text
 SmartShift/
 ├── assets/          Brand and static assets
-├── css/             Responsive page, component, and motion styles
-├── js/              Sign-in, API client, manager, staff, and UI behavior
+├── css/             Responsive page, component, manager, employee, and admin styles
+├── js/              Sign-in, API client, admin, manager, staff, and UI behavior
 ├── server/          Node.js REST API and database connection
-├── tests/           API workflow and UI smoke checks
+├── tests/           API workflow, admin governance, and UI smoke checks
 ├── render.yaml      Free Render service configuration
 ├── index.html       Landing page and application screens
 ├── .env.example     Safe configuration template
@@ -143,7 +144,7 @@ The browser app talks to the same Node.js server that serves the API. The server
 npm test
 ```
 
-The automated checks cover role-based sign-in, cafe workspace separation, staff-only schedule access, shift assignment safeguards, and essential UI screens.
+The automated checks cover multi-tier role authentication (Admin, Manager, Staff), cafe workspace separation, staff-only schedule access, shift assignment safeguards (skills, availability, overtime), and admin governance controls (manager appointment, code regeneration, policy updates).
 
 ## 🔐 Before a public launch
 
