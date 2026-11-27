@@ -157,6 +157,7 @@ function ensureWorkspaces(state) {
     workspace.managerJoinCode ||= generateCode();
     workspace.businessSettings ||= { maxWeeklyHoursDefault: 25, defaultHourlyRate: 250, businessPhone: "", businessAddress: "" };
     for (const worker of workspace.workers) {
+      if (!worker.avatar) { worker.avatar = "👨‍🍳"; changed = true; }
       if (!Array.isArray(worker.certifications)) { worker.certifications = []; changed = true; }
       if (!worker.availability || typeof worker.availability !== "object") { worker.availability = {}; changed = true; }
       if (!Number.isFinite(Number(worker.maxWeeklyHours))) { worker.maxWeeklyHours = 25; changed = true; }

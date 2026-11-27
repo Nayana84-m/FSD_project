@@ -31,6 +31,7 @@
     {
       "id": "emp1",
       "name": "Alex Rivera",
+      "avatar": "👨‍🍳",
       "role": "Part-Time Barista",
       "certifications": [
         "Barista",
@@ -44,6 +45,7 @@
     {
       "id": "emp2",
       "name": "Sam Wilson",
+      "avatar": "👨‍💻",
       "role": "Part-Time Barista",
       "certifications": [
         "Barista",
@@ -56,6 +58,7 @@
     {
       "id": "emp3",
       "name": "Jordan Lee",
+      "avatar": "👩‍💼",
       "role": "Part-Time Cashier",
       "certifications": [
         "Cashier",
@@ -68,6 +71,7 @@
     {
       "id": "emp4",
       "name": "Taylor Swift",
+      "avatar": "⭐",
       "role": "Lead Barista",
       "certifications": [
         "Barista",

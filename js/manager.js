@@ -123,9 +123,9 @@ function initRosterGrid() {
           isAssigned 
             ? `
               <div class="assigned-staff-badge">
-                <span style="font-size:1.4rem;">${worker.avatar}</span>
+                <span style="font-size:1.4rem;">${worker?.avatar || '👨‍🍳'}</span>
                 <div style="flex:1;">
-                  <strong style="font-size:0.88rem;">${worker.name}</strong>
+                  <strong style="font-size:0.88rem;">${worker?.name || 'Assigned Staff'}</strong>
                   <div style="font-size:0.75rem; color:#059669; font-weight:600;">✓ Assigned &amp; Verified</div>
                 </div>
                 <button class="btn btn-outline btn-sm btn-reassign" data-shift-id="${shift.id}" style="padding:0.25rem 0.6rem; font-size:0.75rem;">Edit</button>
