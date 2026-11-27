@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://smartshift-pzj2.onrender.com"><img src="https://img.shields.io/badge/OPEN_THE_LIVE_APP-0D9875?style=for-the-badge&logo=render&logoColor=white" alt="Open the live SmartShift app" /></a>
-  &nbsp; <a href="#run-it-on-your-computer">Run it locally ↓</a>
+  &nbsp; 
 </p>
 
 <p align="center"><img src="assets/smartshift-team-roster.gif" alt="A friendly team roster with opening, midday, and closing shifts" width="720" /></p>
